@@ -1,5 +1,14 @@
-import * as fs from 'fs';
-import * as path from 'path';
+"use strict";
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var fs = __importStar(require("fs"));
+var path = __importStar(require("path"));
 var Config = /** @class */ (function () {
     function Config(userpath) {
         this.path = userpath;
@@ -89,4 +98,4 @@ var Config = /** @class */ (function () {
     };
     return Config;
 }());
-export default Config;
+exports.default = Config;
