@@ -55,9 +55,9 @@ const con = mysql.createConnection(config.get('mysql'));
 ...
 ```
 
-[npm-image]: https://img.shields.io/npm/v/mysql2.svg
+[npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader
-[node-version-image]: http://img.shields.io/node/v/mysql2.svg
+[node-version-image]: http://img.shields.io/node/v/cfg-reader.svg
 [node-version-url]: http://nodejs.org/download/
-[downloads-image]: https://img.shields.io/npm/dm/mysql2.svg
+[downloads-image]: https://img.shields.io/npm/dm/cfg-reader.svg
 [downloads-url]: https://npmjs.org/package/cfg-reader
