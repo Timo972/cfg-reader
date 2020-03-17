@@ -98,6 +98,4 @@ var Config = /** @class */ (function () {
     };
     return Config;
 }());
-exports.default = {
-    Config: Config
-};
+exports.default = Config;

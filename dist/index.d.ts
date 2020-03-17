@@ -5,7 +5,4 @@ declare class Config {
     static load(userpath: string): any;
     get(specify: string | null | undefined): any;
 }
-declare const _default: {
-    Config: typeof Config;
-};
-export default _default;
+export default Config;
