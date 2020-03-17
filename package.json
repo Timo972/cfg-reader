@@ -1,0 +1,32 @@
+{
+  "name": "cfg-reader",
+  "version": "1.0.0",
+  "description": ".cfg file reader",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Timo972/cfg-reader.git"
+  },
+  "keywords": [
+    "cfg",
+    "cfg-reader",
+    "config"
+  ],
+  "author": "Timo92_",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Timo972/cfg-reader/issues"
+  },
+  "homepage": "https://github.com/Timo972/cfg-reader#readme",
+  "devDependencies": {
+    "@types/node": "^13.9.1"
+  },
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "path": "^0.12.7"
+  }
+}
