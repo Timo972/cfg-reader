@@ -1,6 +1,6 @@
 {
   "name": "cfg-reader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": ".cfg file reader",
   "main": "dist/index.js",
   "scripts": {
