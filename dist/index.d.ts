@@ -6,5 +6,6 @@ declare class Config {
     static fromObject(obj: any): string;
     static fromJSON(json: string): string;
     get(specify: string | null | undefined): any;
+    set(key: string, value: any)
 }
 export default Config;

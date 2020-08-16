@@ -87,6 +87,16 @@ class Config {
         }
         return this.conf;
     }
+    set(key, value) {
+        this.conf = this.conf ? this.conf : Config.load(this.path);
+        this.conf[key] = value;
+        console.table(this.conf);
+    }
+    save() {
+        if (this.conf == Config.load(this.path))
+            return;
+        fs.writeFileSync(this.path, Config.fromObject(this.conf));
+    }
     static fromObject(obj) {
         return Config.fromJSON(JSON.stringify(obj));
     }
