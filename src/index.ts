@@ -76,6 +76,15 @@ class Config {
         }
         return this.conf;
     }
+    static fromObject(obj: any) {
+        return Config.fromJSON(JSON.stringify(obj))
+    }
+    static fromJSON(json_obj: string) {
+        json_obj = json_obj.replace(/["\s]/g, '')
+        const cfg = json_obj.slice(1, json_obj.length-1).replace(/,/g, '\n')
+        console.log(cfg)
+        return cfg
+    }
 }
 
 export default Config
