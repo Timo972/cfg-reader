@@ -27,6 +27,10 @@ const config = Config.load('./config.cfg');
 // when you use Config.load, objects and arrays are stringified
 ```
 
+## Notice
+
+ - The setter and save methods arent working rn
+
 ## Example
 
 config.cfg

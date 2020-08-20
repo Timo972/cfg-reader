@@ -80,6 +80,14 @@ class Config {
         }
         return this.conf;
     }
+    has(key: string) {
+        this.conf = this.conf ? this.conf : Config.load(this.path);
+        let specified: any = {};
+        for (const k in this.conf) {
+            if(this.conf.hasOwnProperty(k) && k.split('_')[0] == key)
+                return true
+        }
+    }
     set(key: string, value: any) {
         this.conf = this.conf ? this.conf : Config.load(this.path);
         this.conf[key] = value

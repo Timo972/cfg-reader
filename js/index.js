@@ -87,10 +87,17 @@ class Config {
         }
         return this.conf;
     }
+    has(key) {
+        this.conf = this.conf ? this.conf : Config.load(this.path);
+        let specified = {};
+        for (const k in this.conf) {
+            if (this.conf.hasOwnProperty(k) && k.split('_')[0] == key)
+                return true;
+        }
+    }
     set(key, value) {
         this.conf = this.conf ? this.conf : Config.load(this.path);
         this.conf[key] = value;
-        console.table(this.conf);
     }
     save() {
         if (this.conf == Config.load(this.path))

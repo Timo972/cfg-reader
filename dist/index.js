@@ -60,11 +60,19 @@ var Config = function () {
             return this.conf;
         }
     }, {
+        key: 'has',
+        value: function has(key) {
+            this.conf = this.conf ? this.conf : Config.load(this.path);
+            var specified = {};
+            for (var k in this.conf) {
+                if (this.conf.hasOwnProperty(k) && k.split('_')[0] == key) return true;
+            }
+        }
+    }, {
         key: 'set',
         value: function set(key, value) {
             this.conf = this.conf ? this.conf : Config.load(this.path);
             this.conf[key] = value;
-            console.table(this.conf);
         }
     }, {
         key: 'save',
