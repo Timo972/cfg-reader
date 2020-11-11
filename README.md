@@ -58,6 +58,10 @@ const con = mysql.createConnection(config.get('mysql'));
 ...
 ```
 
+## Todo
+- [ ] Parse code improvement and cleanup
+- [ ] JS Object to cfg method
+
 [npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader
 [node-version-image]: http://img.shields.io/node/v/cfg-reader.svg
