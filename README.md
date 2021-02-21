@@ -4,9 +4,11 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
 
-## Installation
+## License and copyright notice
 
-cfg-reader is free from native bindings and can be installed on Linux, Mac OS or Windows without any issues.
+[alt-config (MIT)](https://github.com/altmp/alt-config)
+
+## Installation
 
 ```bash
 npm i --save cfg-reader

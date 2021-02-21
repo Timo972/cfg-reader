@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as s from 'node-addon-api'
 
 class Config {
     path: string;
