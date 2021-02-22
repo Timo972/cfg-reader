@@ -1,7 +1,9 @@
 #include "config.h"
 #include "convert.h"
 
+#ifdef DEBUG
 #include <iostream>
+#endif
 
 Napi::Object Config::Init(Napi::Env env, Napi::Object exports)
 {
@@ -85,19 +87,22 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
     }
     else if (type == 4 && value.IsDict() && !value.IsList())
     {
+        #ifdef DEBUG
         std::cout << "Config::GetValueOfType is now parsing a dict\n";
-
+        #endif
         auto dict = value.ToDict();
         Napi::Object jsDict = Napi::Object::New(env);
 
-        for (alt::config::Node::Dict::iterator node; node != dict.end(); ++node)
+        for (alt::config::Node::Dict::iterator node = dict.begin(); node != dict.end(); ++node)
         {
             auto first = node->first;
             auto second = node->second;
 
             try
             {
-
+                #ifdef DEBUG
+                std::cout << "Config::GetValueOfType parse dict key value: " << second.ToString() << "\n";
+                #endif
                 auto jsVal = GetValueUnknownType(env, second);
 
                 jsDict.Set(first, jsVal);
@@ -116,9 +121,15 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
         auto list = value.ToList();
         Napi::Array jsList = Napi::Array::New(env);
 
-        for (alt::config::Node::List::iterator node; node != list.end(); ++node)
-        {
+        #ifdef DEBUG
+        std::cout << "Config::GetValueOfType is now parsing a list \n";
+        #endif
 
+        for (alt::config::Node::List::iterator node = list.begin(); node != list.end(); ++node)
+        {
+            #ifdef DEBUG
+            std::cout << "Config::GetValueOfType list parsing got to index " << jsList.Length() << "\n";
+            #endif
             try
             {
                 auto val = GetValueUnknownType(env, *node);
@@ -126,8 +137,11 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
             }
             catch (...)
             {
-                const std::string errorMsg = std::string("Unsupported value in list at index: " + jsList.Length());
-                Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
+                #ifdef DEBUG
+                std::cout << "Config::GetValueOfType could not parse list item type at index: " << jsList.Length() << "\n";
+                #endif
+                //const std::string errorMsg = std::string("Unsupported value in list at index: " + std::to_string(jsList.Length()));
+                //Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
             }
 
         }
@@ -144,9 +158,9 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
 {
 
     if(value.IsDict()) {
-
+        #ifdef DEBUG
         std::cout << "Config::GetValueUnknownType recieved dict to parse\n";
-
+        #endif
         return GetValueOfType(env, 4, value);
 
     } else if(value.IsList()) {
@@ -157,12 +171,18 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
 
     for (int i = 0; i < 5; i++)
     {
+        #ifdef DEBUG
+        std::cout << "Config::GetValueUnknownType trying type " << i << "\n";
+        #endif
         try
         {
             return GetValueOfType(env, i, value);
         }
         catch (...)
         {
+            #ifdef DEBUG
+            std::cout << "Config::GetValueUnknownType type " << i << " is not right type\n";
+            #endif
         }
     }
 
