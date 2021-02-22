@@ -10,7 +10,7 @@
     "build": "node-gyp rebuild",
     "configure": "node-gyp configure",
     "clean": "node-gyp clean",
-    "test": "npm run test:esm && nnpm run test:cjs",
+    "test": "npm run test:esm && npm run test:cjs",
     "test:esm": "mocha ./test/index.test.mjs",
     "test:cjs": "mocha ./test/index.test.cjs"
   },

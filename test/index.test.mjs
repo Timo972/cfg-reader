@@ -32,7 +32,7 @@ after(() => {
         fs.unlinkSync(fileName);
 });
 
-describe("Working with existing config file", () => {
+describe("Working with existing config file in es6", () => {
 
     let config;
 
