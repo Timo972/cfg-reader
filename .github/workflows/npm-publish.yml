@@ -24,6 +24,22 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - uses: actions/cache@v2
+        id: cache
+        env:
+            cache-name: cache-node-modules
+        with:
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+            path: |
+                ~/.npm
+                node_modules
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm install
+
       - run: npm build
         name: Build
       
@@ -43,6 +59,22 @@ jobs:
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
+
+      - uses: actions/cache@v2
+        id: cache
+        env:
+            cache-name: cache-node-modules-pnpm
+        with:
+            key: ${{ runner.os }}-pnpm-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+            path: |
+                ~/.npm
+                node_modules
+            restore-keys: |
+                ${{ runner.os }}-pnpm-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm install
 
       - run: npm build
         name: Build
@@ -81,6 +113,22 @@ jobs:
         with:
           node-version: 14
           registry-url: https://npm.pkg.github.com/
+
+      - uses: actions/cache@v2
+        id: cache
+        env:
+            cache-name: cache-node-modules-pgpr
+        with:
+            key: ${{ runner.os }}-pgpr-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+            path: |
+                ~/.npm
+                node_modules
+            restore-keys: |
+                ${{ runner.os }}-pgpr-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm install
 
       - run: npm build
         name: Build
