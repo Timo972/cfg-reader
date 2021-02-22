@@ -6,7 +6,9 @@
   "module": "index.mjs",
   "types": "./types/index.d.ts",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "node-gyp rebuild",
+    "configure": "node-gyp configure",
     "clean": "node-gyp clean",
     "test": "npm run test:esm && nnpm run test:cjs",
     "test:esm": "mocha ./test/index.test.mjs",
@@ -38,8 +40,7 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "fs": "0.0.1-security",
-    "node-addon-api": "^3.1.0",
-    "node-gyp-build": "^4.2.3"
+    "node-addon-api": "^3.1.0"
   },
   "engines": {
     "node": ">= 12"
