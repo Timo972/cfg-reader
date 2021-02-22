@@ -18,6 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: Checkout
+        with:
+          submodules: true
+          lfs: true
 
       - uses: actions/setup-node@v1
         name: Setup Node.js ${{ matrix.node-version }}
@@ -53,6 +56,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: Checkout
+        with:
+          submodules: true
+          lfs: true
 
       - uses: actions/setup-node@v2
         name: Setup Node.js 14
@@ -107,6 +113,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         name: Checkout
+        with:
+          submodules: true
+          lfs: true
 
       - uses: actions/setup-node@v2
         name: Setup Node.js 14
