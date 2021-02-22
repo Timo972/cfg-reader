@@ -8,7 +8,9 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "clean": "node-gyp clean",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:esm && nnpm run test:cjs",
+    "test:esm": "mocha ./test/index.test.mjs",
+    "test:cjs": "mocha ./test/index.test.cjs"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,11 @@
   "keywords": [
     "cfg",
     "cfg-reader",
-    "config"
+    "config",
+    "alt-config",
+    "alt:V config",
+    "altV config",
+    "altMP config"
   ],
   "author": "Timo92_",
   "license": "ISC",
@@ -28,7 +34,8 @@
   "devDependencies": {
     "@types/node": "^13.13.15",
     "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1"
+    "babel-preset-es2015": "^6.24.1",
+    "mocha": "^8.3.0"
   },
   "dependencies": {
     "bindings": "^1.5.0",
