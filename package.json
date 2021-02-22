@@ -4,6 +4,12 @@
   "description": "A .cfg file reader",
   "main": "index.cjs",
   "module": "index.mjs",
+  "exports": {
+    ".": {
+      "require": "./index.cjs",
+      "default": "./index.mjs"
+    }
+  },
   "types": "./types/index.d.ts",
   "scripts": {
     "postinstall": "npm run build",

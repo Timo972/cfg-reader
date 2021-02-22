@@ -11,7 +11,7 @@
 ## Installation
 
 ```bash
-npm i --save cfg-reader
+npm i --save cfg-reader@next # currently building does not work at linux, feel free to create a pr with correct compile configs to fix that
 ```
 
 ## How to use
