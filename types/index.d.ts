@@ -1,19 +1,44 @@
 declare type ConfigValue = string | boolean | number | any | any[]
 declare module "cfg-reader" {
-    /**
-     * this class cannot be created by constructor
-     */
-    export class Config {
-        public Get(key: string): ConfigValue;
-        public Set(key: string, value: ConfigValue): void;
-        public Save(): boolean;
+
+    export const enum ValueType {
+        Boolean,
+        Number,
+        String,
+        List,
+        Dict
     }
 
-    export function Load(fileName: string): Config;
-
-    /**
-     * @deprecated See {@link Load}
-     * @param fileName string
-     */
-    export function load(fileName: string): Config;
+    export class Config {
+        constructor(fileName: string);
+        public Get(key: string): ConfigValue;
+        /**
+         * @param key {string}
+         * @param value {any}
+         */
+        public Set(key: string, value: ConfigValue): void;
+        public Save(): boolean;
+        public GetOfType(key: string, type: ValueType | number): ConfigValue;
+    }
 }
+
+export const enum ValueType {
+    Boolean,
+    Number,
+    String,
+    List,
+    Dict
+}
+
+export class Config {
+    constructor(fileName: string);
+    public Get(key: string): ConfigValue;
+    /**
+     * @param key {string}
+     * @param value {any}
+     */
+    public Set(key: string, value: ConfigValue): void;
+    public Save(): boolean;
+    public GetOfType(key: string, type: ValueType | number): ConfigValue;
+}
+

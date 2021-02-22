@@ -1,88 +1,36 @@
 #include <napi.h>
-#include <iostream>
-#include <fstream>
 #include <string>
 
-#include "alt-config.h"
-
 #include "convert.h"
+#include "config.h"
 
-alt::config::Node Load(const std::wstring& fileName)
+Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
-    std::ifstream ifile(fileName);
-    alt::config::Parser parser(ifile);
-    try
+    Config::Init(env, exports);
+
+    auto TypeObject = Napi::Object::New(env);
+
+    for (int x = 0; x < 5; x++)
     {
-        auto node = parser.Parse();
-        //test = node["test"].ToBool(true);
-        //test = node["test"].ToString("true");
+        ConfigValueType type = static_cast<ConfigValueType>(x);
+        std::string name;
 
-        return node;
-    }
-    catch (const alt::config::Error& e)
-    {
-        std::cout << e.what() << std::endl;
-    }
-    return false;
-}
+        if (x == 0)
+            name = "Boolean";
+        else if(x == 2)
+            name = "String";
+        else if(x == 1)
+            name = "Number";
+        else if(x == 3)
+            name = "List";
+        else if(x == 4)
+            name = "Dict";
 
-bool Save(const std::wstring& fileName, alt::config::Node node)
-{
-    // node["test"] = test;
-    std::ofstream ofile(fileName);
-    alt::config::Emitter().Emit(node, ofile);
-    return true;
-}
-
-Napi::Boolean SaveFile(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-
-    if (info.Length() != 1) {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        return Napi::Boolean::New(env, false);
-    }    
-
-    if (!info[0].IsString()) {
-        Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        return Napi::Boolean::New(env, false);
+        TypeObject.Set(name, x);
     }
 
-    auto fileName = info[0].As<Napi::String>().Utf8Value();
+    exports.Set("Type", TypeObject);
 
-    auto wFileName = to_wstring(fileName);
-
-    auto saved = true; //Save(test);
-
-    return Napi::Boolean::New(env, saved);
-}
-
-Napi::Object ReadFile(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
-    
-    if (info.Length() != 1) {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        //return env.Null();
-    }
-
-    if (!info[0].IsString()) {
-        Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        //return env.Null();
-    }
-
-    auto fileName = info[0].As<Napi::String>().Utf8Value();
-    auto wFileName = to_wstring(fileName);
-
-    auto node = Load(wFileName);
-
-    auto configClassInstance = Napi::Object::New(env);
-
-    return configClassInstance;
-}
-
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
-    exports.Set("Load", Napi::Function::New(env, ReadFile));
-    //deprecated
-    exports.Set("load", Napi::Function::New(env, ReadFile));
     return exports;
 }
 
