@@ -12,7 +12,6 @@ Napi::Object Init(Napi::Env env, Napi::Object exports)
 
     for (int x = 0; x < 5; x++)
     {
-        ConfigValueType type = static_cast<ConfigValueType>(x);
         std::string name;
 
         if (x == 0)

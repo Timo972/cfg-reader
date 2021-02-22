@@ -23,6 +23,7 @@ class Config : public Napi::ObjectWrap<Config> {
         Napi::Value GetOfType(const Napi::CallbackInfo &info);
         Napi::Value Save(const Napi::CallbackInfo &info);
 
+        Napi::Value GetValueUnknownType(Napi::Env env, alt::config::Node value);
         Napi::Value GetValueOfType(Napi::Env env, int type, alt::config::Node value);
 
         alt::config::Node _node;

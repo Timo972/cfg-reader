@@ -3,12 +3,7 @@
 
 Napi::Object Config::Init(Napi::Env env, Napi::Object exports)
 {
-    Napi::Function func = DefineClass(env, "Config", {
-        InstanceMethod<&Config::Get>("Get"), 
-        InstanceMethod<&Config::GetOfType>("GetOfType"),
-        InstanceMethod<&Config::Set>("Set"),
-        InstanceMethod<&Config::Save>("Save")
-    });
+    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("Get"), InstanceMethod<&Config::GetOfType>("GetOfType"), InstanceMethod<&Config::Set>("Set"), InstanceMethod<&Config::Save>("Save")});
 
     Napi::FunctionReference *constructor = new Napi::FunctionReference();
 
@@ -88,6 +83,21 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
     }
 }
 
+Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        try
+        {
+            return GetValueOfType(env, i, value);
+        }
+        catch (...)
+        {
+        }
+    }
+    return env.Null();
+}
+
 Napi::Value Config::Get(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
@@ -127,30 +137,63 @@ Napi::Value Config::Get(const Napi::CallbackInfo &info)
 
     if (!value.IsDict() && !value.IsList())
     {
-        for (int i = 0; i < 3; i++)
+        try
         {
-            try
-            {
-                return GetValueOfType(env, i, value);
-            }
-            catch (...)
-            {
-            }
+            return GetValueUnknownType(env, value);
         }
-        const std::string errorMsg = std::string("Unknown value at key: " + key);
-        Napi::Error::New(env, errorMsg).ThrowAsJavaScriptException();
-        return env.Null();
+        catch (...)
+        {
+            const std::string errorMsg = std::string("Unknown value at key: " + key);
+            Napi::Error::New(env, errorMsg).ThrowAsJavaScriptException();
+            return env.Null();
+        }
     }
 
     if (value.IsDict())
     {
         auto dict = value.ToDict();
+        Napi::Object jsDict = Napi::Object::New(env);
+        for (alt::config::Node::Dict::iterator node; node != dict.end(); ++node)
+        {
+            auto first = node->first;
+            auto second = node->second;
+
+            try {
+
+                auto jsVal = GetValueUnknownType(env, second);
+
+                jsDict.Set(first, jsVal);
+
+            }catch(...) {
+                const std::string errorMsg = std::string("Unsupported value in dict: " + key + " for key: " + first);
+                Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
+            }
+        }
+
+        return jsDict;
     }
 
     if (value.IsList())
     {
         auto list = value.ToList();
+        Napi::Array jsList = Napi::Array::New(env);
+
+        for (alt::config::Node::List::iterator node; node != list.end(); ++node) {
+
+            try {
+                auto val = GetValueUnknownType(env, node);
+                jsList.Set(jsList.Length(), val);
+            }catch(...) {
+                const std::string errorMsg = std::string("Unsupported value in list: " + key + " at index: " + jsList.Length());
+                Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
+            }
+
+        }
+
+        return jsList;
     }
+
+    return env.Null();
 };
 
 Napi::Value Config::Set(const Napi::CallbackInfo &info)
