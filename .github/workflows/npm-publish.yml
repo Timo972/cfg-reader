@@ -43,7 +43,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
 
-      - run: npm build
+      - run: npm run build
         name: Build
       
       - run: npm test
@@ -82,7 +82,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
 
-      - run: npm build
+      - run: npm run build
         name: Build
 
       - name: Extract version
@@ -140,7 +140,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
 
-      - run: npm build
+      - run: npm run build
         name: Build
 
       - name: Extract version
