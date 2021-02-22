@@ -17,21 +17,49 @@ npm i --save cfg-reader
 ## How to use
 
 ```js
-const Config = require('cfg-reader');
-const config = new Config('./config.cfg');
-config.get('some property');
+const { Config } = require('cfg-reader');
+const myCfg = new Config('config.cfg');
+myCfg.Get('test');
 //with the get method you can easiely filter the lines you need
 ```
-__or__
+
 ```js
-const Config = require('cfg-reader');
-const config = Config.load('./config.cfg');
-// when you use Config.load, objects and arrays are stringified
+const { Config, Type } = require('cfg-reader');
+const testCfg = new Config('test.cfg');
+// If you know which type the value you want to get has you can use
+// GetOfType(key: string, type: number).
+// It directly converts the value to the right type 
+// and does not have to iterate over all possible types.
+// -> little faster
+testCfg.GetOfType('test', Type.String);
 ```
 
-## Notice
+## Differences between v1
+Removed:
+- Config.load()
+- Config.fromJson()
+- Config.fromObject()
+- Config.path
+- Config#has()
 
- - The setter and save methods arent working rn
+Renamed:
+- Config#get() to Config#Get()
+- Config#set() to Config#Set()
+- Config#save() to Config#Save()
+
+Added:
+- Config#GetOfType()
+
+The cfg-reader is now using the open source alt-config parser from the altMP Team.
+It should be way faster than my own parser in v1.
+Additionally is this module now a native node addon.
+If you find a memory leak make sure to create an issue at this repo.
+Contributions are welcome.
+
+## Note
+
+ - The setter method isn't working rn
+ - Lists and Dicts arent support atm
 
 ## Example
 
@@ -43,6 +71,8 @@ mysql_password: test123,
 mysql_database: db
 ```
 __or__
+
+**This is not working until its possible to get dicts**
 ```cfg
 mysql: {
     host: 127.0.0.1,
@@ -53,16 +83,25 @@ mysql: {
 ```
 
 index.js
+**This is not working until its possible to get dicts**
 ```js
 const mysql = require('mysql2');
 const config = new require('cfg-reader')('config.cfg');
-const con = mysql.createConnection(config.get('mysql'));
+const con = mysql.createConnection(config.Get('mysql'));
 ...
 ```
-
-## Todo
-- [ ] Parse code improvement and cleanup
-- [ ] JS Object to cfg method
+**Workaround while its not possible to get dicts**
+```js
+const mysql = require('mysql2');
+const config = new require('cfg-reader')('config.cfg');
+const con = mysql.createConnection({
+    host: config.Get('mysql_host'),
+    user: config.Get('mysql_user'),
+    password: config.Get('mysql_password'),
+    database: config.Get('mysql_database')
+});
+...
+```
 
 [npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader
