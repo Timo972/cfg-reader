@@ -5,6 +5,12 @@ import fs from 'fs';
 const existingKey = "test";
 const existingValue = "testval";
 
+const existingDictKey = "myDict";
+const existingDictValue = "test: 3";
+
+const existingListKey = "myList";
+const existingListValue = "[true, 'hello', 4]";
+
 const newKey = "nkey";
 const newVal = "imNew";
 
@@ -16,7 +22,7 @@ before(() => {
     if (fs.existsSync(fileName))
         fs.unlinkSync(fileName);
 
-    fs.writeFileSync(fileName, `${existingKey}:${existingValue}`, {
+    fs.writeFileSync(fileName, `${existingKey}:${existingValue}\n${existingDictKey}: {${existingDictValue}}\n${existingListKey}:${existingListValue}`, {
         encoding: 'utf8'
     });
 });
@@ -38,6 +44,17 @@ describe("Working with existing config file", () => {
     it("Get already existing value", () => {
         const val = config.Get(existingKey);
         assert.strictEqual(val, existingValue, `Wrong value returned:\nexpected type: ${typeof(existingValue)}\ngot type: ${typeof(val)}\nexpected value: ${existingValue}\ngot value: ${val}`);
+    });
+
+    it("Get existing dict", () => {
+        //console.log(fs.readFileSync(fileName, 'utf8'));
+        const val = config.Get(existingDictKey);
+        assert.deepStrictEqual(val, { test: 3 }, `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`);
+    });
+
+    it("Get existing list", () => {
+        const val = config.Get(existingListKey);
+        assert.deepStrictEqual(val, [true,'hello',4], `Failed to parse list:\nexpected: ${JSON.stringify([true,'hello',4])}\ngot: ${JSON.stringify(val)}\ngot type: ${typeof(val)}`);
     });
 
     it("Set new value", () => {
