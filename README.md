@@ -58,21 +58,11 @@ Contributions are welcome.
 
 ## Note
 
- - The setter method isn't working rn
- - Lists and Dicts arent support atm
+ - You can only set integers, booleans and strings via the set method currently
 
 ## Example
 
 config.cfg
-```cfg
-mysql_host: 127.0.0.1,
-mysql_user: root,
-mysql_password: test123,
-mysql_database: db
-```
-__or__
-
-**This is not working until its possible to get dicts**
 ```cfg
 mysql: {
     host: 127.0.0.1,
@@ -81,24 +71,41 @@ mysql: {
     database: db
 }
 ```
-
 index.js
-**This is not working until its possible to get dicts**
 ```js
 const mysql = require('mysql2');
-const config = new require('cfg-reader')('config.cfg');
+const config = new require('cfg-reader').Config('config.cfg'); 
+// equal to es6
+// import { Config } from 'cfg-reader';
+// const config = new Config('config.cfg');
 const con = mysql.createConnection(config.Get('mysql'));
 ...
 ```
-**Workaround while its not possible to get dicts**
+__or__
+
+config.cfg
+```ini
+mysql_host: 127.0.0.1
+mysql_user: root
+mysql_password: test123
+mysql_database: db
+mysql_wait: no # no is equal with false and yes is equal with true
+mysql_climit: 10
+mysql_qlimit: 0
+```
+index.js
 ```js
 const mysql = require('mysql2');
-const config = new require('cfg-reader')('config.cfg');
+const { Config, Type } = require('cfg-reader');
+const config = new Config('config.cfg');
 const con = mysql.createConnection({
-    host: config.Get('mysql_host'),
+    host: config.GetOfType('mysql_host', Type.String),
     user: config.Get('mysql_user'),
     password: config.Get('mysql_password'),
-    database: config.Get('mysql_database')
+    database: config.Get('mysql_database'),
+    waitForConnections: config.GetOfType('mysql_wait', Type.Boolean),
+    connectionLimit: config.GetOfType('mysql_climit', Type.Number),
+    queueLimit: config.Get('mysql_qlimit')
 });
 ...
 ```
