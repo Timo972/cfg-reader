@@ -1,3 +1,8 @@
 import GetBinding from 'bindings';
 
-export default GetBinding("config");
+const bindings = GetBinding("config");
+
+export const Config = bindings.Config;
+export const Type = bindings.Type;
+
+export default bindings;
