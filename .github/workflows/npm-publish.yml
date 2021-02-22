@@ -1,8 +1,12 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - '*.*.*-rc*'
+      - '*.*.*'
 
 jobs:
   build:
@@ -13,12 +17,18 @@ jobs:
         node-version: [12.x, 14.x, 15.x]
     steps:
       - uses: actions/checkout@v2
+        name: Checkout
+
       - uses: actions/setup-node@v1
         name: Setup Node.js ${{ matrix.node-version }}
         with:
           node-version: ${{ matrix.node-version }}
+
       - run: npm build
+        name: Build
+      
       - run: npm test
+        name: Test
 
   publish-npm:
     needs: build
@@ -26,12 +36,36 @@ jobs:
     name: Build & Publish
     steps:
       - uses: actions/checkout@v2
+        name: Checkout
+
       - uses: actions/setup-node@v2
+        name: Setup Node.js 14
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
+
       - run: npm build
+        name: Build
+
+      - name: Extract version
+        id: version
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=TAG::${TAG}
+
+      - name: Bump package.json version
+        run: echo "`jq '.version="${{ steps.version.outputs.TAG }}"' package.json`" > package.json
+
+      - run: npm publish --tag next
+        if: contains(steps.version.outputs.TAG, 'rc')
+        name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
       - run: npm publish
+        name: Publish
+        if: "!contains(steps.version.outputs.TAG, 'rc')"
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
@@ -40,11 +74,35 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+        name: Checkout
+
+      - uses: actions/setup-node@v2
+        name: Setup Node.js 14
         with:
           node-version: 14
           registry-url: https://npm.pkg.github.com/
+
       - run: npm build
+        name: Build
+
+      - name: Extract version
+        id: version
+        shell: bash
+        run: |
+          TAG=${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=TAG::${TAG}
+
+      - name: Bump package.json version
+        run: echo "`jq '.version="${{ steps.version.outputs.TAG }}"' package.json`" > package.json
+
+      - run: npm publish --tag next
+        if: contains(steps.version.outputs.TAG, 'rc')
+        name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - run: npm publish
+        name: Publish
+        if: "!contains(steps.version.outputs.TAG, 'rc')"
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
