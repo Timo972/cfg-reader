@@ -93,6 +93,7 @@ jobs:
           echo ::set-output name=TAG::${TAG}
 
       - name: Bump package.json version
+        shell: bash
         run: echo "`jq '.version="${{ steps.version.outputs.TAG }}"' package.json`" > package.json
 
       - run: npm publish --tag next
@@ -150,6 +151,7 @@ jobs:
           echo ::set-output name=TAG::${TAG}
 
       - name: Bump package.json version
+        shell: bash
         run: echo "`jq '.version="${{ steps.version.outputs.TAG }}"' package.json`" > package.json
 
       - run: npm publish --tag next
