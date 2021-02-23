@@ -8,6 +8,11 @@
 
 [alt-config (MIT)](https://github.com/altmp/alt-config)
 
+## Important
+- You can only set integers, booleans and strings via the set method currently
+- The alt:V JS-Module will not be able to import this module
+  -> you **can not** use this in alt:V Multiplayer
+
 ## Installation
 
 ```bash
@@ -55,10 +60,6 @@ It should be way faster than my own parser in v1.
 Additionally is this module now a native node addon.
 If you find a memory leak make sure to create an issue at this repo.
 Contributions are welcome.
-
-## Note
-
- - You can only set integers, booleans and strings via the set method currently
 
 ## Example
 
