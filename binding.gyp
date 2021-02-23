@@ -1,8 +1,8 @@
 {
     "targets": [
         {
-            "cflags": [ "-fno-exceptions", "-std=c++17"],
-            "cflags_cc": ["-fno-exceptions", "-std=c++17"],
+            "cflags": [ "-fno-exceptions" ],
+            "cflags_cc": [ "-fno-exceptions" ],
             "target_name": "config",
             "sources": ["src/main.cc","src/convert.cc","src/config.cc","src/helper.cc"],
             "include_dirs": ["<!(node -p \"require('node-addon-api').include_dir\")", "deps/alt-config", "include"],
