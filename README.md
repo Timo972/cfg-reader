@@ -3,6 +3,11 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/865f452f649248989b121761bda06fcc)](https://app.codacy.com/gh/Timo972/cfg-reader?utm_source=github.com&utm_medium=referral&utm_content=Timo972/cfg-reader&utm_campaign=Badge_Grade_Settings)
+
+⚡⚡ Take a look at the @next version in [⚠dev branch⚠](https://github.com/Timo972/cfg-reader/tree/dev).
+It got some API changes and is now based on the alt-config parser by the altMP Team.
+Currently only working on Windows ☹.
 
 ## Installation
 
@@ -26,6 +31,10 @@ const Config = require('cfg-reader');
 const config = Config.load('./config.cfg');
 // when you use Config.load, objects and arrays are stringified
 ```
+
+## Notice
+
+ - The setter and save methods arent working rn
 
 ## Example
 
@@ -53,6 +62,10 @@ const config = new require('cfg-reader')('config.cfg');
 const con = mysql.createConnection(config.get('mysql'));
 ...
 ```
+
+## Todo
+- [ ] Parse code improvement and cleanup
+- [ ] JS Object to cfg method
 
 [npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader

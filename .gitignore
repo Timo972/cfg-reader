@@ -11,3 +11,6 @@ resources
 server.cfg
 server.log
 update.json
+test.js
+t.cfg
+test.cfg
