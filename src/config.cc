@@ -264,24 +264,19 @@ Napi::Value Config::Set(const Napi::CallbackInfo &info)
 
     std::string key = info[0].As<Napi::String>().Utf8Value();
 
-    auto valueNode = this->_node[key];
-
     if (info[1].IsNumber())
     {
         double value = info[1].As<Napi::Number>().DoubleValue();
-        //value = valueNode.ToNumber(value);
         this->_node[key] = value;
     }
     else if (info[1].IsBoolean())
     {
         bool value = info[1].As<Napi::Boolean>().Value();
-        //value = valueNode.ToBool(value);
         this->_node[key] = value;
     }
     else if (info[1].IsString())
     {
         std::string value = info[1].As<Napi::String>().Utf8Value();
-        //value = valueNode.ToString(value);
         this->_node[key] = value;
     }
     else

@@ -3,6 +3,7 @@
 [![NPM Version][npm-image]][npm-url]
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/aec7d7510bb34f138b70c304818945e4)](https://www.codacy.com/gh/Timo972/cfg-reader/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Timo972/cfg-reader&amp;utm_campaign=Badge_Grade)
 
 ## License and copyright notice
 
@@ -10,8 +11,7 @@
 
 ## Important
 - You can only set integers, booleans and strings via the set method currently
-- The alt:V JS-Module will not be able to import this module
-  -> you **can not** use this in alt:V Multiplayer
+- The alt:V JS-Module will not be able to import this module -> you **can not** use this in alt:V Multiplayer
 
 ## Installation
 
@@ -82,7 +82,7 @@ const config = new require('cfg-reader').Config('config.cfg');
 const con = mysql.createConnection(config.Get('mysql'));
 ...
 ```
-__or__
+## or
 
 config.cfg
 ```ini
