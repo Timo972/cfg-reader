@@ -1,2 +1,13 @@
 node_modules
 tsconfig.json
+.altvrc
+altv-server.exe
+build
+crashdumps
+data
+deps
+modules
+resources
+server.cfg
+server.log
+update.json
