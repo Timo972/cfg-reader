@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 var ValueType;
 (function (ValueType) {
     ValueType[ValueType["Boolean"] = 0] = "Boolean";
@@ -14,7 +15,7 @@ class Config {
         this.path = path;
         this.config = null;
         this.lineCache = [];
-        if (typeof (this.path) === 'string')
+        if (typeof this.path === 'string')
             this.parse();
         else
             this.config = this.path;
@@ -26,8 +27,15 @@ class Config {
             // end of list
             // process list through lineCache
             const key = this.lineCache[1];
-            const values = seperator == null ? this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '[') : this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '[').join(seperator).trim().replace(/\s/g, '').split(seperator);
-            console.log(values);
+            const values = seperator == null
+                ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '[')
+                : this.lineCache
+                    .slice(2, this.lineCache.length)
+                    .filter((x) => x !== '[')
+                    .join(seperator)
+                    .trim()
+                    .replace(/\s/g, '')
+                    .split(seperator);
             this.lineCache = [];
             const parsed = [];
             for (const value of values) {
@@ -43,8 +51,15 @@ class Config {
             // end of dict
             // process dict through lineCache
             const key = this.lineCache[1];
-            const values = seperator == null ? this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '{') : this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '{').join(seperator).trim().replace(/\s/g, '').split(seperator);
-            console.log(values);
+            const values = seperator == null
+                ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '{')
+                : this.lineCache
+                    .slice(2, this.lineCache.length)
+                    .filter((x) => x !== '{')
+                    .join(seperator)
+                    .trim()
+                    .replace(/\s/g, '')
+                    .split(seperator);
             this.lineCache = [];
             const parsed = {};
             for (const value of values) {
@@ -71,20 +86,21 @@ class Config {
         const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
         const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
-        console.log(lValue);
         if (lValue.startsWith('[') || lValue.startsWith('{')) {
             // begin of list (0) / dict (1)^
-            console.log('Begin of list / dict');
             this.lineCache = [];
             this.lineCache.push(lValue.startsWith('{') ? '1' : '0');
             this.lineCache.push(lKey);
-            this.lineCache.push((lValue.includes(']') || lValue.includes('}')) ? lValue : lValue.replace(/,/g, ''));
+            this.lineCache.push(lValue.includes(']') || lValue.includes('}') ? lValue : lValue.replace(/,/g, ''));
             return null;
         }
         const dictOrListInline = this.processDictOrList(line, ',');
         if (dictOrListInline != null)
             return dictOrList;
-        return [lKey, this.parseValueUnknownType(lValue.lastIndexOf(',') == lValue.length - 1 ? lValue.substring(0, lValue.length - 1) : lValue)];
+        return [
+            lKey,
+            this.parseValueUnknownType(lValue.lastIndexOf(',') == lValue.length - 1 ? lValue.substring(0, lValue.length - 1) : lValue),
+        ];
     }
     parseValueUnknownType(value) {
         for (const sType in ValueType) {
@@ -95,15 +111,14 @@ class Config {
                 const parsedValue = this.parseValueOfType(type, value);
                 return parsedValue;
             }
-            catch (e) {
-                //console.log(e);
-            }
+            catch (e) { }
         }
     }
     parseValueOfType(type, value) {
         if (type === ValueType.Boolean) {
             const val = Boolean(value);
-            if (typeof val !== 'boolean' || (value !== 'true' && value !== 'false' && value !== 'yes' && value !== 'no'))
+            if (typeof val !== 'boolean' ||
+                (value !== 'true' && value !== 'false' && value !== 'yes' && value !== 'no'))
                 throw new Error('Wrong type: boolean');
             return val;
         }
@@ -117,8 +132,11 @@ class Config {
             let val = String(value);
             if (typeof val !== 'string')
                 throw new Error('Wrong type: string');
-            val = (val.indexOf('"') == 0 || val.indexOf("'") == 0) ? val.substring(1, val.length) : val;
-            val = (val.lastIndexOf('"') == val.length - 1 || val.lastIndexOf("'") == val.length - 1) ? val.substring(0, val.length - 1) : val;
+            val = val.indexOf('"') == 0 || val.indexOf("'") == 0 ? val.substring(1, val.length) : val;
+            val =
+                val.lastIndexOf('"') == val.length - 1 || val.lastIndexOf("'") == val.length - 1
+                    ? val.substring(0, val.length - 1)
+                    : val;
             return val;
         }
         else if (type === ValueType.Dict) ;
@@ -126,20 +144,17 @@ class Config {
     }
     parse() {
         this.config = {};
-        if (typeof (this.path) !== 'string')
+        if (typeof this.path !== 'string')
             return;
         const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
         for (const line of fileContent.split('\n')) {
             const parsedLine = this.parseLine(line);
             if (parsedLine != null)
                 this.config[parsedLine[0]] = parsedLine[1];
-            console.log('Parsed line', parsedLine, this.config);
         }
     }
     get(key) {
-        console.log('get key:', key);
-        console.log('config:', this.config);
-        return (key in this.config) ? this.config[key] : null;
+        return key in this.config ? this.config[key] : null;
     }
     has(key) {
         return key in this.config;
