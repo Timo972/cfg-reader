@@ -4,7 +4,8 @@
   "description": "A .cfg file reader",
   "scripts": {
     "build": "rollup -c",
-    "test": "mocha test/test.mjs"
+    "test": "mocha test/test.mjs",
+    "lint": "eslint . --fix"
   },
   "repository": {
     "type": "git",
@@ -13,7 +14,8 @@
   "keywords": [
     "cfg",
     "cfg-reader",
-    "config"
+    "config",
+    "alt-config"
   ],
   "author": "Timo92_",
   "license": "ISC",
