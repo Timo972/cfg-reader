@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs';
-//import readline from 'readline';
 import path from 'path';
 
 declare type ConfigObject = { [key: string]: any };

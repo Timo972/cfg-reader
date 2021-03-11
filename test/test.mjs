@@ -1,91 +1,105 @@
 import Config from '../dist/index.esm.mjs';
-import { strict as assert } from "assert";
+import { strict as assert } from 'assert';
 import fs from 'fs';
 
-const existingKey = "test";
-const existingValue = "\"testval',";
+const existingKey = 'test';
+const existingValue = '"testval\',';
 
-const existingDictKey = "myDict";
-const existingDictValue = "test: 3";
+const existingDictKey = 'myDict';
+const existingDictValue = 'test: 3';
 
-const existingListKey = "myList";
+const existingListKey = 'myList';
 const existingListValue = `[
     true, 
     'hello', 
     4
 ]`;
 
-const newKey = "nkey";
-const newVal = "imNew";
+const newKey = 'nkey';
+const newVal = 'imNew';
 
-const overwriteVal = "overwrittenVal";
+const overwriteVal = 'overwrittenVal';
 
-const fileName = "test.cfg";
+const fileName = 'test.cfg';
 
 before(() => {
-    if (fs.existsSync(fileName))
-        fs.unlinkSync(fileName);
+    if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 
-    fs.writeFileSync(fileName, `${existingKey}:'${existingValue}'\n${existingDictKey}: {
+    fs.writeFileSync(
+        fileName,
+        `${existingKey}:'${existingValue}'\n${existingDictKey}: {
         ${existingDictValue}
-    }\n${existingListKey}:${existingListValue}`, {
-        encoding: 'utf8'
-    });
+    }\n${existingListKey}:${existingListValue}`,
+        {
+            encoding: 'utf8',
+        },
+    );
 });
 
 after(() => {
-    if (fs.existsSync(fileName))
-        fs.unlinkSync(fileName);
+    if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 });
 
-describe("Working with existing config file in es6", () => {
-
+describe('Working with existing config file in es6', () => {
     let config;
 
-    it("Open file", () => {
+    it('Open file', () => {
         config = new Config(fileName);
         //assert.equal("Get" in Config, true, "Invalid config instance");
     });
 
-    it("Get already existing value", () => {
+    it('Get already existing value', () => {
         const val = config.get(existingKey);
-        assert.strictEqual(val, existingValue, `Wrong value returned:\nexpected type: ${typeof(existingValue)}\ngot type: ${typeof(val)}\nexpected value: ${existingValue}\ngot value: ${val}`);
+        assert.strictEqual(
+            val,
+            existingValue,
+            `Wrong value returned:\nexpected type: ${typeof existingValue}\ngot type: ${typeof val}\nexpected value: ${existingValue}\ngot value: ${val}`,
+        );
     });
 
-    it("Get existing dict", () => {
+    it('Get existing dict', () => {
         //console.log(fs.readFileSync(fileName, 'utf8'));
         const val = config.get(existingDictKey);
-        assert.deepStrictEqual(val, { test: 3 }, `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`);
+        assert.deepStrictEqual(
+            val,
+            { test: 3 },
+            `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
+        );
     });
 
-    it("Get existing list", () => {
+    it('Get existing list', () => {
         const val = config.get(existingListKey);
-        assert.deepStrictEqual(val, [true,'hello',4], `Failed to parse list:\nexpected: ${JSON.stringify([true,'hello',4])}\ngot: ${JSON.stringify(val)}\ngot type: ${typeof(val)}`);
+        assert.deepStrictEqual(
+            val,
+            [true, 'hello', 4],
+            `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+                val,
+            )}\ngot type: ${typeof val}`,
+        );
     });
 
-    it("Set new value", () => {
+    it('Set new value', () => {
         const success = config.set(newKey, newVal);
-        assert.strictEqual(success, true, "Error while setting key/value");
+        assert.strictEqual(success, true, 'Error while setting key/value');
     });
 
-    it("Check if new value got setted", () => {
+    it('Check if new value got setted', () => {
         const val = config.get(newKey);
-        assert.strictEqual(val, newVal, "Failed to set new value");
+        assert.strictEqual(val, newVal, 'Failed to set new value');
     });
 
-    it("Overwrite an existing value", () => {
+    it('Overwrite an existing value', () => {
         const success = config.set(existingKey, overwriteVal);
-        assert.strictEqual(success, true, "Error while overwriting an existing key/value");
+        assert.strictEqual(success, true, 'Error while overwriting an existing key/value');
     });
 
-    it("Check if overwritten value got updated", () => {
+    it('Check if overwritten value got updated', () => {
         const val = config.get(existingKey);
-        assert.strictEqual(val, overwriteVal, "Failed to overwrite value");
+        assert.strictEqual(val, overwriteVal, 'Failed to overwrite value');
     });
 
-    it("Save changes to file", () => {
+    it('Save changes to file', () => {
         const success = config.save();
-        assert.strictEqual(success, true, "Could not save changes to file");
+        assert.strictEqual(success, true, 'Could not save changes to file');
     });
-
 });
