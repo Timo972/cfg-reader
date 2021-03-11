@@ -1,5 +1,7 @@
 'use strict';
 
+Object.defineProperty(exports, '__esModule', { value: true });
+
 var fs = require('fs');
 var path = require('path');
 
@@ -8,22 +10,23 @@ function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'defau
 var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
 var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
 
-var ValueType;
+exports.ValueType = void 0;
 (function (ValueType) {
     ValueType[ValueType["Boolean"] = 0] = "Boolean";
     ValueType[ValueType["Number"] = 1] = "Number";
     ValueType[ValueType["String"] = 2] = "String";
     ValueType[ValueType["List"] = 3] = "List";
     ValueType[ValueType["Dict"] = 4] = "Dict";
-})(ValueType || (ValueType = {}));
+})(exports.ValueType || (exports.ValueType = {}));
 class Config {
     constructor(path) {
         this.path = path;
         this.config = null;
         this.lineCache = [];
-        this.parse();
-    }
-    static load(path) {
+        if (typeof (this.path) === 'string')
+            this.parse();
+        else
+            this.config = this.path;
     }
     processDictOrList(line, seperator = null) {
         if (line.includes(']')) {
@@ -74,7 +77,7 @@ class Config {
             this.lineCache.push(line.trim().replace(/\s/g, ''));
             return null;
         }
-        const lSplitted = line.trim().replace(/\s/g, '').replace(/'/g, '').split(':');
+        const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
         const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
         console.log(lValue);
@@ -90,10 +93,10 @@ class Config {
         const dictOrListInline = this.processDictOrList(line, ',');
         if (dictOrListInline != null)
             return dictOrList;
-        return [lKey, this.parseValueUnknownType(lValue.replace(/,/g, ''))];
+        return [lKey, this.parseValueUnknownType(lValue.lastIndexOf(',') == lValue.length - 1 ? lValue.substring(0, lValue.length - 1) : lValue)];
     }
     parseValueUnknownType(value) {
-        for (const sType in ValueType) {
+        for (const sType in exports.ValueType) {
             const type = Number(sType);
             if (isNaN(type))
                 return;
@@ -107,40 +110,33 @@ class Config {
         }
     }
     parseValueOfType(type, value) {
-        if (type === ValueType.Boolean) {
+        if (type === exports.ValueType.Boolean) {
             const val = Boolean(value);
             if (typeof val !== 'boolean' || (value !== 'true' && value !== 'false' && value !== 'yes' && value !== 'no'))
                 throw new Error('Wrong type: boolean');
             return val;
         }
-        else if (type === ValueType.Number) {
+        else if (type === exports.ValueType.Number) {
             const val = Number(value);
             if (typeof val !== 'number' || isNaN(val))
                 throw new Error('Wrong type: number');
             return val;
         }
-        else if (type === ValueType.String) {
-            const val = String(value);
+        else if (type === exports.ValueType.String) {
+            let val = String(value);
             if (typeof val !== 'string')
                 throw new Error('Wrong type: string');
-            return String(value);
+            val = (val.indexOf('"') == 0 || val.indexOf("'") == 0) ? val.substring(1, val.length) : val;
+            val = (val.lastIndexOf('"') == val.length - 1 || val.lastIndexOf("'") == val.length - 1) ? val.substring(0, val.length - 1) : val;
+            return val;
         }
-        else if (type === ValueType.Dict) ;
-        else if (type === ValueType.List) ;
+        else if (type === exports.ValueType.Dict) ;
+        else if (type === exports.ValueType.List) ;
     }
     parse() {
         this.config = {};
-        //const fileStream = fs.createReadStream(path.normalize(this.path));
-        //readline.createInterface({
-        //    input: fileStream,
-        //    output: process.stdout,
-        //    terminal: false
-        //}).on('line', (line) => {
-        //    const parsedLine = this.parseLine(line);
-        //    if (parsedLine != null)
-        //        this.config[parsedLine[0]] = parsedLine[1];
-        //    console.log('Parsed line', parsedLine, this.config)
-        //});
+        if (typeof (this.path) !== 'string')
+            return;
         const fileContent = fs__default['default'].readFileSync(path__default['default'].normalize(this.path), { encoding: 'utf8' });
         for (const line of fileContent.split('\n')) {
             const parsedLine = this.parseLine(line);
@@ -150,35 +146,21 @@ class Config {
         }
     }
     get(key) {
-        //if (this.config == null)
-        //    this.parse()
         console.log('get key:', key);
         console.log('config:', this.config);
         return (key in this.config) ? this.config[key] : null;
     }
     has(key) {
-        //if (this.config == null)
-        //    this.parse()
         return key in this.config;
     }
     set(key, value) {
-        //if (this.config == null)
-        //    this.parse()
         this.config[key] = value;
         return true;
     }
     save() {
         return true;
     }
-    static fromObject(obj) {
-        return Config.fromJSON(JSON.stringify(obj));
-    }
-    static fromJSON(json_obj) {
-        json_obj = json_obj.replace(/["\s]/g, '');
-        const cfg = json_obj.slice(1, json_obj.length - 1).replace(/,/g, '\n');
-        console.log(cfg);
-        return cfg;
-    }
 }
 
-module.exports = Config;
+exports.Config = Config;
+exports.default = Config;

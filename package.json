@@ -39,5 +39,6 @@
       "require": "./dist/index.js",
       "default": "./dist/index.esm.mjs"
     }
-  }
+  },
+  "types": "./dist/index.d.ts"
 }

@@ -3,7 +3,7 @@ import { strict as assert } from "assert";
 import fs from 'fs';
 
 const existingKey = "test";
-const existingValue = "testval";
+const existingValue = "\"testval',";
 
 const existingDictKey = "myDict";
 const existingDictValue = "test: 3";
@@ -26,7 +26,7 @@ before(() => {
     if (fs.existsSync(fileName))
         fs.unlinkSync(fileName);
 
-    fs.writeFileSync(fileName, `${existingKey}:${existingValue}\n${existingDictKey}: {
+    fs.writeFileSync(fileName, `${existingKey}:'${existingValue}'\n${existingDictKey}: {
         ${existingDictValue}
     }\n${existingListKey}:${existingListValue}`, {
         encoding: 'utf8'

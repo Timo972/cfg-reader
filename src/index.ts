@@ -4,7 +4,7 @@ import path from 'path';
 
 declare type ConfigObject = { [key: string]: any };
 
-enum ValueType {
+export enum ValueType {
     Boolean,
     Number,
     String,
@@ -12,13 +12,14 @@ enum ValueType {
     Dict
 }
 
-class Config {
+export class Config {
     private config: ConfigObject = null;
     private lineCache: string[] = [];
-    constructor(public readonly path: string) {
-        this.parse();
-    }
-    public static load(path: string) {
+    constructor(public readonly path: string | ConfigObject) {
+        if (typeof (this.path) === 'string')
+            this.parse();
+        else
+            this.config = this.path;
     }
     protected processDictOrList(line: string, seperator: string = null): any | null {
         if (line.includes(']')) {
@@ -73,7 +74,7 @@ class Config {
         //! maybe this has to be checked at the end of this function to support inline lists / dicts
         const dictOrList = this.processDictOrList(line)
 
-        if(dictOrList != null)
+        if (dictOrList != null)
             return dictOrList;
 
         if (this.lineCache.length > 0) {
@@ -82,7 +83,7 @@ class Config {
             return null;
         }
 
-        const lSplitted = line.trim().replace(/\s/g, '').replace(/'/g, '').split(':');
+        const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
         const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
 
@@ -99,10 +100,10 @@ class Config {
         }
 
         const dictOrListInline = this.processDictOrList(line, ',')
-        if(dictOrListInline != null)
+        if (dictOrListInline != null)
             return dictOrList;
 
-        return [lKey, this.parseValueUnknownType(lValue.replace(/,/g, ''))];
+        return [lKey, this.parseValueUnknownType(lValue.lastIndexOf(',') == lValue.length - 1 ? lValue.substring(0, lValue.length - 1) : lValue)];
     }
     protected parseValueUnknownType(value: string): any {
         for (const sType in ValueType) {
@@ -128,10 +129,12 @@ class Config {
                 throw new Error('Wrong type: number');
             return val;
         } else if (type === ValueType.String) {
-            const val = String(value);
+            let val = String(value);
             if (typeof val !== 'string')
                 throw new Error('Wrong type: string');
-            return String(value);
+            val = (val.indexOf('"') == 0 || val.indexOf("'") == 0) ? val.substring(1, val.length) : val;
+            val = (val.lastIndexOf('"') == val.length - 1 || val.lastIndexOf("'") == val.length - 1) ? val.substring(0, val.length - 1) : val;
+            return val;
         } else if (type === ValueType.Dict) {
             // iterate over key: value pair
         } else if (type === ValueType.List) {
@@ -141,17 +144,9 @@ class Config {
     }
     protected parse(): void {
         this.config = {};
-        //const fileStream = fs.createReadStream(path.normalize(this.path));
-        //readline.createInterface({
-        //    input: fileStream,
-        //    output: process.stdout,
-        //    terminal: false
-        //}).on('line', (line) => {
-        //    const parsedLine = this.parseLine(line);
-        //    if (parsedLine != null)
-        //        this.config[parsedLine[0]] = parsedLine[1];
-        //    console.log('Parsed line', parsedLine, this.config)
-        //});
+
+        if (typeof (this.path) !== 'string') return;
+
         const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
 
         for (const line of fileContent.split('\n')) {
@@ -163,34 +158,19 @@ class Config {
 
     }
     get(key: string): any {
-        //if (this.config == null)
-        //    this.parse()
         console.log('get key:', key);
         console.log('config:', this.config);
         return (key in this.config) ? this.config[key] : null;
     }
     has(key: string): boolean {
-        //if (this.config == null)
-        //    this.parse()
         return key in this.config;
     }
     set(key: string, value: any): boolean {
-        //if (this.config == null)
-        //    this.parse()
         this.config[key] = value;
         return true;
     }
     save(): boolean {
         return true;
-    }
-    static fromObject(obj: any) {
-        return Config.fromJSON(JSON.stringify(obj))
-    }
-    static fromJSON(json_obj: string) {
-        json_obj = json_obj.replace(/["\s]/g, '')
-        const cfg = json_obj.slice(1, json_obj.length - 1).replace(/,/g, '\n')
-        console.log(cfg)
-        return cfg
     }
 }
 

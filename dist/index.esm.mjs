@@ -14,9 +14,10 @@ class Config {
         this.path = path;
         this.config = null;
         this.lineCache = [];
-        this.parse();
-    }
-    static load(path) {
+        if (typeof (this.path) === 'string')
+            this.parse();
+        else
+            this.config = this.path;
     }
     processDictOrList(line, seperator = null) {
         if (line.includes(']')) {
@@ -67,7 +68,7 @@ class Config {
             this.lineCache.push(line.trim().replace(/\s/g, ''));
             return null;
         }
-        const lSplitted = line.trim().replace(/\s/g, '').replace(/'/g, '').split(':');
+        const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
         const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
         console.log(lValue);
@@ -83,7 +84,7 @@ class Config {
         const dictOrListInline = this.processDictOrList(line, ',');
         if (dictOrListInline != null)
             return dictOrList;
-        return [lKey, this.parseValueUnknownType(lValue.replace(/,/g, ''))];
+        return [lKey, this.parseValueUnknownType(lValue.lastIndexOf(',') == lValue.length - 1 ? lValue.substring(0, lValue.length - 1) : lValue)];
     }
     parseValueUnknownType(value) {
         for (const sType in ValueType) {
@@ -113,27 +114,20 @@ class Config {
             return val;
         }
         else if (type === ValueType.String) {
-            const val = String(value);
+            let val = String(value);
             if (typeof val !== 'string')
                 throw new Error('Wrong type: string');
-            return String(value);
+            val = (val.indexOf('"') == 0 || val.indexOf("'") == 0) ? val.substring(1, val.length) : val;
+            val = (val.lastIndexOf('"') == val.length - 1 || val.lastIndexOf("'") == val.length - 1) ? val.substring(0, val.length - 1) : val;
+            return val;
         }
         else if (type === ValueType.Dict) ;
         else if (type === ValueType.List) ;
     }
     parse() {
         this.config = {};
-        //const fileStream = fs.createReadStream(path.normalize(this.path));
-        //readline.createInterface({
-        //    input: fileStream,
-        //    output: process.stdout,
-        //    terminal: false
-        //}).on('line', (line) => {
-        //    const parsedLine = this.parseLine(line);
-        //    if (parsedLine != null)
-        //        this.config[parsedLine[0]] = parsedLine[1];
-        //    console.log('Parsed line', parsedLine, this.config)
-        //});
+        if (typeof (this.path) !== 'string')
+            return;
         const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
         for (const line of fileContent.split('\n')) {
             const parsedLine = this.parseLine(line);
@@ -143,35 +137,21 @@ class Config {
         }
     }
     get(key) {
-        //if (this.config == null)
-        //    this.parse()
         console.log('get key:', key);
         console.log('config:', this.config);
         return (key in this.config) ? this.config[key] : null;
     }
     has(key) {
-        //if (this.config == null)
-        //    this.parse()
         return key in this.config;
     }
     set(key, value) {
-        //if (this.config == null)
-        //    this.parse()
         this.config[key] = value;
         return true;
     }
     save() {
         return true;
     }
-    static fromObject(obj) {
-        return Config.fromJSON(JSON.stringify(obj));
-    }
-    static fromJSON(json_obj) {
-        json_obj = json_obj.replace(/["\s]/g, '');
-        const cfg = json_obj.slice(1, json_obj.length - 1).replace(/,/g, '\n');
-        console.log(cfg);
-        return cfg;
-    }
 }
 
 export default Config;
+export { Config, ValueType };
