@@ -1,11 +1,10 @@
 {
   "name": "cfg-reader",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "A .cfg file reader",
-  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && babel js -d dist",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c",
+    "test": "mocha test/test.mjs"
   },
   "repository": {
     "type": "git",
@@ -23,15 +22,22 @@
   },
   "homepage": "https://github.com/Timo972/cfg-reader#readme",
   "devDependencies": {
-    "@types/node": "^13.13.15",
-    "babel-cli": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1"
-  },
-  "dependencies": {
-    "fs": "0.0.1-security",
-    "path": "^0.12.7"
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^13.13.46",
+    "mocha": "^8.3.1",
+    "rollup": "^2.41.1",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.2.3"
   },
   "engines": {
     "node": ">= 10"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.esm.mjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "default": "./dist/index.esm.mjs"
+    }
   }
 }

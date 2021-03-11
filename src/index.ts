@@ -1,100 +1,187 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+//import readline from 'readline';
+import path from 'path';
+
+declare type ConfigObject = { [key: string]: any };
+
+enum ValueType {
+    Boolean,
+    Number,
+    String,
+    List,
+    Dict
+}
 
 class Config {
-    path: string;
-    private conf: any;
-    constructor(userpath: string) {
-        this.path = userpath;
+    private config: ConfigObject = null;
+    private lineCache: string[] = [];
+    constructor(public readonly path: string) {
+        this.parse();
     }
-    static load(userpath: string) {
-        if (!fs.existsSync(userpath)) {
-            console.error(new Error('File does not exist!'));
-        }
-        let config_string: any = fs.readFileSync(path.normalize(userpath), { encoding: 'utf8' });
-        config_string = config_string.replace(/(?:[,\r"' ])/g, '').split(/\n/g).map((chunk: string) => chunk.indexOf('#') != -1 ? chunk.substr(0, chunk.indexOf('#')) : chunk).map((chunk: string) => chunk.split(/:(.+)/, 2));
-        let config: any = {};
-        let object_start: any;
-        let array_start: any;
-        config_string.forEach((chunk: Array<string>) => {
-            if (chunk[0] == '') return;
-            if (chunk[1] == '{' || chunk[1] == '[') {
-                if (chunk[1] == '{') {
-                    config[chunk[0]] = chunk[1];
-                    object_start = chunk[0];
-                } else {
-                    config[chunk[0]] = chunk[1];
-                    array_start = chunk[0];
-                }
-            } else if (chunk[0] == '}' || chunk[0] == ']') {
-                if (chunk[0] == '}') {
-                    config[object_start] = config[object_start].substr(0, config[object_start].length - 1);
-                    config[object_start] += chunk[0];
-                    object_start = undefined;
-                } else {
-                    config[array_start] = config[array_start].substr(0, config[array_start].length - 1);
-                    config[array_start] += chunk[0];
-                    array_start = undefined;
-                }
-            } else {
-                if (object_start != undefined) {
-                    config[object_start] += `"${chunk[0]}":"${chunk[1]}",`;
-                } else if (array_start != undefined) {
-                    config[array_start] += `"${chunk[0]}",`;
-                } else {
-                    config[chunk[0]] = chunk[1];
-                }
+    public static load(path: string) {
+    }
+    protected processDictOrList(line: string, seperator: string = null): any | null {
+        if (line.includes(']')) {
+            if (this.lineCache[0] !== '0') throw new Error('Invalid config syntax');
+            // end of list
+            // process list through lineCache
+            const key = this.lineCache[1];
+            const values = seperator == null ? this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '[') : this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '[').join(seperator).trim().replace(/\s/g, '').split(seperator);
+
+            console.log(values);
+
+            this.lineCache = [];
+
+            const parsed = [];
+
+            for (const value of values) {
+                const keyValuePair = this.parseLine(value);
+                if (keyValuePair != null)
+                    parsed.push(keyValuePair[1])
             }
-        });
-        return config;
-    }
-    get(specify: string | null | undefined) {
-        this.conf = this.conf ? this.conf : Config.load(this.path);
-        if (specify) {
-            let specified: any = {};
-            for (const key in this.conf) {
-                if (this.conf.hasOwnProperty(key) && key.split('_')[0] == specify) {
-                    const selector = key.split('_')[1];
-                    if (selector == undefined) {
-                        specified = this.conf[key];
-                    } else {
-                        specified[selector] = this.conf[key];
-                    }
-                    try {
-                        if (selector == undefined) {
-                            if (specified.charAt(0) == '{' || specified.charAt(0) == '[') {
-                                specified = JSON.parse(this.conf[key]);
-                            }
-                        } else {
-                            if (specified[selector].charAt(0) == '{' || specified[selector].charAt(0) == '[') {
-                                specified[selector] = JSON.parse(this.conf[key]);
-                            }
-                        }
-                    } catch (error) {
-                        console.log('you can ignore this: ' + error);
-                        return;
-                    }
-                }
+
+            return [key, parsed];
+        }
+
+        else if (line.includes('}')) {
+            if (this.lineCache[0] !== '1') throw new Error('Invalid config syntax');
+            // end of dict
+            // process dict through lineCache
+            const key = this.lineCache[1];
+            const values = seperator == null ? this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '{') : this.lineCache.slice(2, this.lineCache.length).filter(x => x !== '{').join(seperator).trim().replace(/\s/g, '').split(seperator);
+
+            console.log(values);
+
+            this.lineCache = [];
+
+            const parsed = {};
+
+            for (const value of values) {
+                const keyValuePair = this.parseLine(value);
+                if (keyValuePair != null)
+                    parsed[keyValuePair[0]] = keyValuePair[1];
             }
-            return specified === {} ? null : specified;
+
+            return [key, parsed];
         }
-        return this.conf;
+
+        return null;
     }
-    has(key: string) {
-        this.conf = this.conf ? this.conf : Config.load(this.path);
-        for (const k in this.conf) {
-            if(this.conf.hasOwnProperty(k) && k.split('_')[0] == key)
-                return true
+    protected parseLine(line: string): [string, any] | null {
+        if (line.startsWith('#')) return;
+
+        //! maybe this has to be checked at the end of this function to support inline lists / dicts
+        const dictOrList = this.processDictOrList(line)
+
+        if(dictOrList != null)
+            return dictOrList;
+
+        if (this.lineCache.length > 0) {
+            // collecting data for parsing dict or list, return null to not add to config
+            this.lineCache.push(line.trim().replace(/\s/g, ''));
+            return null;
         }
-        return false
+
+        const lSplitted = line.trim().replace(/\s/g, '').replace(/'/g, '').split(':');
+        const lKey = lSplitted[0];
+        const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
+
+        console.log(lValue)
+
+        if (lValue.startsWith('[') || lValue.startsWith('{')) {
+            // begin of list (0) / dict (1)^
+            console.log('Begin of list / dict')
+            this.lineCache = [];
+            this.lineCache.push(lValue.startsWith('{') ? '1' : '0')
+            this.lineCache.push(lKey)
+            this.lineCache.push((lValue.includes(']') || lValue.includes('}')) ? lValue : lValue.replace(/,/g, ''))
+            return null;
+        }
+
+        const dictOrListInline = this.processDictOrList(line, ',')
+        if(dictOrListInline != null)
+            return dictOrList;
+
+        return [lKey, this.parseValueUnknownType(lValue.replace(/,/g, ''))];
     }
-    set(key: string, value: any) {
-        this.conf = this.conf ? this.conf : Config.load(this.path);
-        this.conf[key] = value
+    protected parseValueUnknownType(value: string): any {
+        for (const sType in ValueType) {
+            const type = Number(sType);
+            if (isNaN(type)) return
+            try {
+                const parsedValue = this.parseValueOfType(type, value);
+                return parsedValue;
+            } catch (e) {
+                //console.log(e);
+            }
+        }
     }
-    save() {
-        if (this.conf == Config.load(this.path)) return
-        fs.writeFileSync(this.path, Config.fromObject(this.conf))
+    protected parseValueOfType(type: ValueType, value: string): any {
+        if (type === ValueType.Boolean) {
+            const val = Boolean(value);
+            if (typeof val !== 'boolean' || (value !== 'true' && value !== 'false' && value !== 'yes' && value !== 'no'))
+                throw new Error('Wrong type: boolean');
+            return val;
+        } else if (type === ValueType.Number) {
+            const val = Number(value);
+            if (typeof val !== 'number' || isNaN(val))
+                throw new Error('Wrong type: number');
+            return val;
+        } else if (type === ValueType.String) {
+            const val = String(value);
+            if (typeof val !== 'string')
+                throw new Error('Wrong type: string');
+            return String(value);
+        } else if (type === ValueType.Dict) {
+            // iterate over key: value pair
+        } else if (type === ValueType.List) {
+            // iterate over list
+
+        }
+    }
+    protected parse(): void {
+        this.config = {};
+        //const fileStream = fs.createReadStream(path.normalize(this.path));
+        //readline.createInterface({
+        //    input: fileStream,
+        //    output: process.stdout,
+        //    terminal: false
+        //}).on('line', (line) => {
+        //    const parsedLine = this.parseLine(line);
+        //    if (parsedLine != null)
+        //        this.config[parsedLine[0]] = parsedLine[1];
+        //    console.log('Parsed line', parsedLine, this.config)
+        //});
+        const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
+
+        for (const line of fileContent.split('\n')) {
+            const parsedLine = this.parseLine(line);
+            if (parsedLine != null)
+                this.config[parsedLine[0]] = parsedLine[1];
+            console.log('Parsed line', parsedLine, this.config)
+        }
+
+    }
+    get(key: string): any {
+        //if (this.config == null)
+        //    this.parse()
+        console.log('get key:', key);
+        console.log('config:', this.config);
+        return (key in this.config) ? this.config[key] : null;
+    }
+    has(key: string): boolean {
+        //if (this.config == null)
+        //    this.parse()
+        return key in this.config;
+    }
+    set(key: string, value: any): boolean {
+        //if (this.config == null)
+        //    this.parse()
+        this.config[key] = value;
+        return true;
+    }
+    save(): boolean {
+        return true;
     }
     static fromObject(obj: any) {
         return Config.fromJSON(JSON.stringify(obj))

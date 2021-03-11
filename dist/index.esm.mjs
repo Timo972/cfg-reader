@@ -1,12 +1,5 @@
-'use strict';
-
-var fs = require('fs');
-var path = require('path');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
-var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+import fs from 'fs';
+import path from 'path';
 
 var ValueType;
 (function (ValueType) {
@@ -141,7 +134,7 @@ class Config {
         //        this.config[parsedLine[0]] = parsedLine[1];
         //    console.log('Parsed line', parsedLine, this.config)
         //});
-        const fileContent = fs__default['default'].readFileSync(path__default['default'].normalize(this.path), { encoding: 'utf8' });
+        const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
         for (const line of fileContent.split('\n')) {
             const parsedLine = this.parseLine(line);
             if (parsedLine != null)
@@ -181,4 +174,4 @@ class Config {
     }
 }
 
-module.exports = Config;
+export default Config;
