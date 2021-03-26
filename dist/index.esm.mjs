@@ -1,24 +1,15 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-var fs = require('fs');
-var path = require('path');
-
-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
-
-var fs__default = /*#__PURE__*/_interopDefaultLegacy(fs);
-var path__default = /*#__PURE__*/_interopDefaultLegacy(path);
+import fs from 'fs';
+import path from 'path';
 
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-exports.ValueType = void 0;
+var ValueType;
 (function (ValueType) {
     ValueType[ValueType["Boolean"] = 0] = "Boolean";
     ValueType[ValueType["Number"] = 1] = "Number";
     ValueType[ValueType["String"] = 2] = "String";
     ValueType[ValueType["List"] = 3] = "List";
     ValueType[ValueType["Dict"] = 4] = "Dict";
-})(exports.ValueType || (exports.ValueType = {}));
+})(ValueType || (ValueType = {}));
 class Config {
     constructor(path) {
         this.path = path;
@@ -112,7 +103,7 @@ class Config {
         ];
     }
     parseValueUnknownType(value) {
-        for (const sType in exports.ValueType) {
+        for (const sType in ValueType) {
             const type = Number(sType);
             if (isNaN(type))
                 return;
@@ -124,20 +115,20 @@ class Config {
         }
     }
     parseValueOfType(type, value) {
-        if (type === exports.ValueType.Boolean) {
+        if (type === ValueType.Boolean) {
             const val = Boolean(value);
             if (typeof val !== 'boolean' ||
                 (value !== 'true' && value !== 'false' && value !== 'yes' && value !== 'no'))
                 throw new Error('Wrong type: boolean');
             return val;
         }
-        else if (type === exports.ValueType.Number) {
+        else if (type === ValueType.Number) {
             const val = Number(value);
             if (typeof val !== 'number' || isNaN(val))
                 throw new Error('Wrong type: number');
             return val;
         }
-        else if (type === exports.ValueType.String) {
+        else if (type === ValueType.String) {
             let val = String(value);
             if (typeof val !== 'string')
                 throw new Error('Wrong type: string');
@@ -148,14 +139,14 @@ class Config {
                     : val;
             return val;
         }
-        else if (type === exports.ValueType.Dict) ;
-        else if (type === exports.ValueType.List) ;
+        else if (type === ValueType.Dict) ;
+        else if (type === ValueType.List) ;
     }
     parse() {
         this.config = {};
         if (typeof this.path !== 'string')
             return;
-        const fileContent = fs__default['default'].readFileSync(path__default['default'].normalize(this.path), { encoding: 'utf8' });
+        const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
         for (const line of fileContent.split('\n')) {
             const parsedLine = this.parseLine(line);
             if (parsedLine != null)
@@ -177,5 +168,5 @@ class Config {
     }
 }
 
-exports.Config = Config;
-exports.default = Config;
+export default Config;
+export { Config, ValueType };

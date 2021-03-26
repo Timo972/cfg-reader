@@ -21,19 +21,16 @@ npm i --save cfg-reader
 ```js
 const Config = require('cfg-reader');
 const config = new Config('./config.cfg');
-config.get('some property');
+config.get('some_property');
 //with the get method you can easiely filter the lines you need
-```
-__or__
-```js
-const Config = require('cfg-reader');
-const config = Config.load('./config.cfg');
-// when you use Config.load, objects and arrays are stringified
 ```
 
 ## Notice
 
- - The setter and save methods arent working rn
+ - The save method is not working rn
+ - Commas at the end are optional
+ - Inline keys are **not** supported (``mysql: { host: 127.0.0.1 }``) currently
+ - For more information take a look at [alt:V Config docs](https://docs.altv.mp/articles/configs/index.html)
 
 ## Example
 
@@ -63,8 +60,8 @@ const con = mysql.createConnection(config.get('mysql'));
 ```
 
 ## Todo
-- [ ] Parse code improvement and cleanup
-- [ ] JS Object to cfg method
+- [ ] create stringify method
+- [ ] support inline dicts and lists
 
 [npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader

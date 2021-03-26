@@ -1,0 +1,5 @@
+node_modules
+.github
+.vscode
+dist
+rollup.config.mjs
