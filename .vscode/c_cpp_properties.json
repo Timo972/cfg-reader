@@ -6,14 +6,14 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/deps",
                 "${workspaceFolder}/deps/alt-config",
-                "${workspaceFolder}/node_modules/node-addon-api",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "C:/Users/timob/.node-gyp/11.12.0/include/node"
             ],
             "intelliSenseMode": "msvc-x64",
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"]
+            "defines": []
         }
     ],
     "version": 4

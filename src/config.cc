@@ -5,20 +5,43 @@
 #include <iostream>
 #endif
 
-Napi::Object Config::Init(Napi::Env env, Napi::Object exports)
+void Config::Init(v8::Local<v8::Object> exports)
 {
-    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("Get"), InstanceMethod<&Config::GetOfType>("GetOfType"), InstanceMethod<&Config::Set>("Set"), InstanceMethod<&Config::Save>("Save")});
+    v8::Isolate *isolate = exports->GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
-    Napi::FunctionReference *constructor = new Napi::FunctionReference();
+    v8::Local<v8::ObjectTemplate> addon_data_tpl = v8::ObjectTemplate::New(isolate);
+    addon_data_tpl->SetInternalFieldCount(1);
+    v8::Local<v8::Object> addon_data = addon_data_tpl->NewInstance(context).ToLocalChecked();
 
-    *constructor = Napi::Persistent(func);
+    v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, New, addon_data);
+    tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Config"));
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-    exports.Set("Config", func);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "Get", Get);
 
-    env.SetInstanceData<Napi::FunctionReference>(constructor);
+    v8::Local<v8::Function> constructor = tpl->GetFunction(context).ToLocalChecked();
+    addon_data->SetInternalField(0, constructor);
 
-    return exports;
+    exports->Set(context, v8::String::NewFromUtf8(isolate, "Config"), constructor).FromJust();
 };
+
+void Config::New(const v8::FunctionCallbackInfo<v8::Value> &args)
+{
+    v8::Isolate *isolate = args.GetIsolate();
+    v8::Local<v8::Context> context = isolate->GetCurrentContext();
+
+    if (args.IsConstructCall())
+    {
+        if (!args[0]->IsString() || args.Length() != 1)
+        {
+            isolate->ThrowException(v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "Invalid params passed")));
+            return;
+        }
+
+        v8::Local<v8::String> fileName = args[0]->ToString(isolate);
+    }
+}
 
 Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
 {
@@ -87,9 +110,9 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
     }
     else if (type == 4 && value.IsDict() && !value.IsList())
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         std::cout << "Config::GetValueOfType is now parsing a dict\n";
-        #endif
+#endif
         auto dict = value.ToDict();
         Napi::Object jsDict = Napi::Object::New(env);
 
@@ -100,9 +123,9 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
 
             try
             {
-                #ifdef DEBUG
+#ifdef DEBUG
                 std::cout << "Config::GetValueOfType parse dict key value: " << second.ToString() << "\n";
-                #endif
+#endif
                 auto jsVal = GetValueUnknownType(env, second);
 
                 jsDict.Set(first, jsVal);
@@ -121,15 +144,15 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
         auto list = value.ToList();
         Napi::Array jsList = Napi::Array::New(env);
 
-        #ifdef DEBUG
+#ifdef DEBUG
         std::cout << "Config::GetValueOfType is now parsing a list \n";
-        #endif
+#endif
 
         for (alt::config::Node::List::iterator node = list.begin(); node != list.end(); ++node)
         {
-            #ifdef DEBUG
+#ifdef DEBUG
             std::cout << "Config::GetValueOfType list parsing got to index " << jsList.Length() << "\n";
-            #endif
+#endif
             try
             {
                 auto val = GetValueUnknownType(env, *node);
@@ -137,18 +160,18 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
             }
             catch (...)
             {
-                #ifdef DEBUG
+#ifdef DEBUG
                 std::cout << "Config::GetValueOfType could not parse list item type at index: " << jsList.Length() << "\n";
-                #endif
+#endif
                 //const std::string errorMsg = std::string("Unsupported value in list at index: " + std::to_string(jsList.Length()));
                 //Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
             }
-
         }
 
         return jsList;
     }
-    else {
+    else
+    {
         Napi::TypeError::New(env, "Invalid type passed at Config::GetValueOfType").ThrowAsJavaScriptException();
         return env.Null();
     }
@@ -157,39 +180,40 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
 Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
 {
 
-    if(value.IsDict()) {
-        #ifdef DEBUG
+    if (value.IsDict())
+    {
+#ifdef DEBUG
         std::cout << "Config::GetValueUnknownType recieved dict to parse\n";
-        #endif
+#endif
         return GetValueOfType(env, 4, value);
-
-    } else if(value.IsList()) {
+    }
+    else if (value.IsList())
+    {
 
         return GetValueOfType(env, 3, value);
-
     }
 
     for (int i = 0; i < 5; i++)
     {
-        #ifdef DEBUG
+#ifdef DEBUG
         std::cout << "Config::GetValueUnknownType trying type " << i << "\n";
-        #endif
+#endif
         try
         {
             return GetValueOfType(env, i, value);
         }
         catch (...)
         {
-            #ifdef DEBUG
+#ifdef DEBUG
             std::cout << "Config::GetValueUnknownType type " << i << " is not right type\n";
-            #endif
+#endif
         }
     }
 
     return env.Null();
 }
 
-Napi::Value Config::Get(const Napi::CallbackInfo &info)
+void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
     Napi::Env env = info.Env();
 
