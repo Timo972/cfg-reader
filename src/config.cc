@@ -51,9 +51,10 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
     if (info.Length() > 1 && info[1].IsBoolean())
         createFileIfNotExist = info[1].As<Napi::Boolean>().Value();
 
-    this->_name = wFileName;
+    //this->_name = wFileName;
+    this->_name = fileName;
 
-    auto node = altWrapper::Load(wFileName);
+    auto node = altWrapper::Load(fileName);
 
     if (node == false && createFileIfNotExist != true)
     {
