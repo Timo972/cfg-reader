@@ -7,7 +7,6 @@
 
 ⚡⚡ Take a look at the @next version in [⚠dev branch⚠](https://github.com/Timo972/cfg-reader/tree/dev).
 It got some API changes and is now based on the alt-config parser by the altMP Team.
-Currently only working on Windows ☹.
 
 ## Installation
 
