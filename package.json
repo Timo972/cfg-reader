@@ -14,7 +14,7 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "postinstall": "echo \"should be built already\"",
-    "build": "node scripts/get-node.cjs && node-gyp rebuild --nodedir ./deps/alt-node",
+    "build": "node scripts/get-node.cjs && node scripts/build.cjs",
     "configure": "node-gyp configure --nodedir ./deps/alt-node",
     "clean": "node-gyp clean",
     "test": "npm run test:esm && npm run test:cjs",

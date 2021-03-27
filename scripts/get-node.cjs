@@ -31,9 +31,6 @@ async function main() {
   if (!binariesAsset)
     throw new Error(`Could not find binaries in latest release`);
 
-  //if(!fs.existsSync(binarieOutPath))
-  //  fs.mkdirSync(binarieOutPath)
-
   console.log(
     `Downloading node binary: ${binariesAsset.name} (${binariesAsset.browser_download_url})`
   );
@@ -54,7 +51,7 @@ async function main() {
 
   console.log(`Unzipped binaries`);
 
-  const outReleasePath = `${binarieOutPath}/out/Release`;
+  const outReleasePath = `${binarieOutPath}/Release`;
 
   if (!fs.existsSync(outReleasePath))
     fs.mkdirSync(outReleasePath, { recursive: true });
@@ -63,39 +60,15 @@ async function main() {
   for (const entry of Object.values(entries)) {
     const desc = entry.isDirectory ? "directory" : `${entry.size} bytes`;
     console.log(`Entry ${entry.name}: ${desc}`);
-    zip.extract(entry, outReleasePath);
+    await zip.extract(entry, outReleasePath);
+    if (entry.name.includes("libnode.lib"))
+      fs.renameSync(
+        `${outReleasePath}/${entry.name}`,
+        `${outReleasePath}/${entry.name.replace(/lib/, "")}`
+      );
   }
-
-  //await zip.close();
 
   fs.rmSync(zipFile);
 }
 
 main();
-
-/*
-const buildPath = path.join(__dirname, '..', 'deps', 'alt-node', 'alt-build');
-const outPath = path.join(__dirname, '..', 'deps', 'alt-node', 'Release');
-const donePath = path.join(__dirname, '..', 'deps', 'alt-node-build', 'Release');
-
-if(!fs.existsSync(buildPath))
-    throw new Error(`alt-node submodule not found`);
-
-if(process.platform !== 'win32' && process.platform !== 'darwin')
-    throw new Error(`This platform (${process.platform}) is not supported!`);
-
-const nodeBuild = process.platform === 'win32' ? spawn('alt-release.bat', {
-    cwd: buildPath
-}) : spawn('./alt-release.sh', {
-    cwd: buildPath
-});
-
-nodeBuild.stdout.pipe(process.stdout);
-nodeBuild.stderr.pipe(process.stderr);
-
-nodeBuild.on('close', (code, signal) => {
-    if(!fs.existsSync(outPath))
-        throw new Error(`Compiling alt-node failed!`);
-
-    fse.copySync(outPath, donePath);
-});*/
