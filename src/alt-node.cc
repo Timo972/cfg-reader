@@ -2,6 +2,7 @@
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define ISWIN
 #include <windows.h>
+typedef void (CALLBACK* NODE_MODULE_REGISTER_FUNC)(void *);
 #else
 #include <dlfcn.h>
 #endif
@@ -15,16 +16,18 @@ extern "C" NODE_EXTERN void node_module_register(void *mod)
     {
         return;
     }
-    auto proc = GetProcAddress(base_ptr, "node_module_register");
+    auto register_func = (NODE_MODULE_REGISTER_FUNC)GetProcAddress(base_ptr, "node_module_register");
 
-    if (proc == nullptr)
+    if (register_func == nullptr)
     {
         return;
     }
 
-    auto register_func = reinterpret_cast<decltype(&node_module_register)>(proc);
-
     register_func(mod);
+
+    //auto register_func = reinterpret_cast<decltype(&node_module_register)>(proc);
+
+    //register_func(mod);
 }
 #else
 extern "C" NODE_EXTERN void node_module_register(void *mod)
