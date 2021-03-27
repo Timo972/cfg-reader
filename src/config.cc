@@ -1,5 +1,4 @@
 #include "config.h"
-#include "convert.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -64,31 +63,25 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
     if (info.Length() > 1 && !info[1].IsBoolean())
     {
         Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        //return Napi::Boolean::New(env, false);
         return;
     }
 
     auto fileName = info[0].As<Napi::String>().Utf8Value();
-    auto wFileName = to_wstring(fileName);
 
     bool createFileIfNotExist = false;
 
     if (info.Length() > 1 && info[1].IsBoolean())
         createFileIfNotExist = info[1].As<Napi::Boolean>().Value();
 
-    this->_name = wFileName;
+    this->_name = fileName;
 
-    auto node = altWrapper::Load(wFileName);
+    auto node = altWrapper::Load(fileName);
 
     if (node == false && createFileIfNotExist != true)
     {
         Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
         return;
     }
-
-    //if(node == false) {
-    //    return;
-    //}
 
     this->_node = node;
 };

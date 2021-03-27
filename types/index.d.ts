@@ -1,45 +1,58 @@
-declare type ConfigValue = string | boolean | number | any | any[]
+declare module "cfg-reader" {
 
-//declare module "cfg-reader" {
-//
-//    export const enum ValueType {
-//        Boolean,
-//        Number,
-//        String,
-//        List,
-//        Dict
-//    }
-//
-//    export class Config {
-//        constructor(fileName: string);
-//        public Get(key: string): ConfigValue;
-//        /**
-//         * @param key {string}
-//         * @param value {any}
-//         */
-//        public Set(key: string, value: ConfigValue): void;
-//        public Save(): boolean;
-//        public GetOfType(key: string, type: ValueType | number): ConfigValue;
-//    }
-//}
+    export type ConfigValue = string | boolean | number | any | any[]
 
-export const enum ValueType {
-    Boolean,
-    Number,
-    String,
-    List,
-    Dict
-}
-
-export class Config {
-    constructor(fileName: string);
-    public Get(key: string): ConfigValue;
     /**
-     * @param key {string}
-     * @param value {any}
+     * Same enum as the object passed from the native addon
+     * You can use this if you use Typescript
      */
-    public Set(key: string, value: ConfigValue): void;
-    public Save(): boolean;
-    public GetOfType(key: string, type: ValueType | number): ConfigValue;
-}
+    export const enum ValueType {
+        Boolean,
+        Number,
+        String,
+        List,
+        Dict
+    }
 
+    /**
+     * Equal to the ValueType enum, just for JS
+     */
+    export const Type = {
+        Boolean: 0,
+        Number: 1,
+        String: 2,
+        List: 3,
+        Dict: 4
+    }
+
+    /**
+     * 
+     */
+    export class Config {
+        constructor(fileName: string);
+        /**
+         * Get a config value with unknown type, slower than GetOfType
+         * @param key {string}
+         * @returns {ConfigValue}
+         */
+        public Get(key: string): ConfigValue;
+        /**
+         * Set a config value
+         * @param key {string}
+         * @param value {any}
+         */
+        public Set(key: string, value: ConfigValue): void;
+        /**
+         * Save the current changes to the opened file
+         */
+        public Save(): boolean;
+        /**
+         * Get a config value with known type, faster than normal Get
+         * @param key {string}
+         * @param type {ValueType}
+         * @returns {ConfigValue}
+         */
+        public GetOfType(key: string, type: ValueType | number): ConfigValue;
+    }
+
+}

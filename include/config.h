@@ -33,5 +33,5 @@ class Config : public node::ObjectWrap {
         //void GetValueOfType(Napi::Env env, int type, alt::config::Node value);
 
         alt::config::Node _node;
-        std::wstring _name;
+        std::string _name;
 };
