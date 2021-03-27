@@ -1,0 +1,15 @@
+build
+cache
+crashdumps
+data
+modules
+resources
+.altvrc
+altv-server
+altv-server.exe
+jsconfig.json
+server.cfg
+server.log
+update.json
+.vscode
+.github
