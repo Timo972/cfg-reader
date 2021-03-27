@@ -1,4 +1,5 @@
-#include <napi.h>
+#include <node.h>
+#include <node_object_wrap.h>
 
 #include "helper.h"
 
@@ -11,19 +12,25 @@ enum ConfigValueType
     Dict
 };
 
-class Config : public Napi::ObjectWrap<Config> {
+class Config : public node::ObjectWrap {
     public:
-        static Napi::Object Init(Napi::Env env, Napi::Object exports);
-        Config(const Napi::CallbackInfo &info);
-
+        static void Init(v8::Local<v8::Object> exports);
+        //Config(const Napi::CallbackInfo &info);
+        //static Napi::Value Load(const Napi::CallbackInfo &info);
+        
     private:
-        Napi::Value Get(const Napi::CallbackInfo &info);
-        Napi::Value Set(const Napi::CallbackInfo &info);
-        Napi::Value GetOfType(const Napi::CallbackInfo &info);
-        Napi::Value Save(const Napi::CallbackInfo &info);
+        explicit Config(std::string fileName);
+        ~Config();
 
-        Napi::Value GetValueUnknownType(Napi::Env env, alt::config::Node value);
-        Napi::Value GetValueOfType(Napi::Env env, int type, alt::config::Node value);
+        static void New(const v8::FunctionCallbackInfo<v8::Value> &args);
+
+        static void Get(const v8::FunctionCallbackInfo<v8::Value> &info);
+        static void Set(const v8::FunctionCallbackInfo<v8::Value> &info);
+        static void GetOfType(const v8::FunctionCallbackInfo<v8::Value> &info);
+        static void Save(const v8::FunctionCallbackInfo<v8::Value> &info);
+
+        static v8::Local<v8::Value> GetValueUnknownType(v8::Isolate* isolate, alt::config::Node value);
+        static v8::Local<v8::Value> GetValueOfType(v8::Isolate * isolate, int type, alt::config::Node value);
 
         alt::config::Node _node;
         std::string _name;
