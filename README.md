@@ -11,12 +11,17 @@
 
 ## Important
 - You can only set integers, booleans and strings via the set method currently
-- The alt:V JS-Module will not be able to import this module -> you **can not** use this in alt:V Multiplayer
+- If you want to use this module along the alt:V JS Module, follow the corresponding installation tutorial
 
 ## Installation
 
 ```bash
 npm i --save cfg-reader@next
+```
+
+## Installation for alt:V
+```bash
+npm i --save cfg-reader@alt
 ```
 
 ## How to use
@@ -47,13 +52,8 @@ Removed:
 - Config.path
 - Config#has()
 
-Renamed:
-- Config#get() to Config#Get()
-- Config#set() to Config#Set()
-- Config#save() to Config#Save()
-
 Added:
-- Config#GetOfType()
+- Config#getOfType()
 
 The cfg-reader is now using the open source alt-config parser from the altMP Team.
 It should be way faster than my own parser in v1.
