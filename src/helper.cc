@@ -1,7 +1,5 @@
-#include <string>
-#include <fstream>
+#include "helper.h"
 
-#include "alt-config.h"
 namespace altWrapper
 {
     alt::config::Node Load(const std::string &fileName)

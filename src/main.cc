@@ -1,11 +1,15 @@
 #include <napi.h>
 #include <string>
+#include <iostream>
 
-#include "convert.h"
 #include "config.h"
 
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
+    #ifdef DEBUG
+        std::cout << "Creating exports" << std::endl;
+    #endif
+
     Config::Init(env, exports);
 
     auto TypeObject = Napi::Object::New(env);

@@ -7,13 +7,16 @@
   "exports": {
     ".": {
       "require": "./index.cjs",
-      "default": "./index.mjs"
+      "default": "./index.mjs",
+      "import": "./index.mjs"
     }
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "echo \"should be built already\"",
+    "build-alt": "node-gyp rebuild --nodedir G:/Dev/altV/alt-node",
     "build": "node-gyp rebuild",
+    "configure-alt": "node-gyp configure --nodedir G:/Dev/altV/alt-node",
     "configure": "node-gyp configure",
     "clean": "node-gyp clean",
     "test": "npm run test:esm && npm run test:cjs",
