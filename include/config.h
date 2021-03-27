@@ -19,7 +19,7 @@ class Config : public node::ObjectWrap {
         //static Napi::Value Load(const Napi::CallbackInfo &info);
         
     private:
-        explicit Config(std::string fileName);
+        explicit Config(v8::Isolate* isolate, std::string fileName);
         ~Config();
 
         static void New(const v8::FunctionCallbackInfo<v8::Value> &args);

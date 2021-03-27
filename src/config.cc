@@ -28,14 +28,14 @@ void Config::Init(v8::Local<v8::Object> exports)
     exports->Set(context, v8::String::NewFromUtf8(isolate, "Config").ToLocalChecked(), constructor).FromJust();
 };
 
-Config::Config(std::string fileName) : _name(fileName)
+Config::Config(v8::Isolate *isolate, std::string fileName) : _name(fileName)
 {
     auto node = altWrapper::Load(this->_name);
 
     if (node == false)
     {
-
-        //Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "File does not exist").ToLocalChecked()));
+        std::cout << "File does not exist" << std::endl;
         return;
     }
 
@@ -64,7 +64,7 @@ void Config::New(const v8::FunctionCallbackInfo<v8::Value> &args)
 
         std::string name = std::string(*str, str.length());
 
-        Config *cfg = new Config(name);
+        Config *cfg = new Config(isolate, name);
 
         cfg->Wrap(args.This());
         args.GetReturnValue().Set(args.This());
@@ -222,7 +222,7 @@ v8::Local<v8::Value> Config::GetValueUnknownType(v8::Isolate *isolate, alt::conf
         return GetValueOfType(isolate, 3, value);
     }
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 3; i++)
     {
 #ifdef DEBUG
         std::cout << "Config::GetValueUnknownType trying type " << i << "\n";
@@ -244,6 +244,9 @@ v8::Local<v8::Value> Config::GetValueUnknownType(v8::Isolate *isolate, alt::conf
 
 void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
+#ifdef DEBUG
+    std::cout << "invoked Config::Get" << std::endl;
+#endif
     v8::Isolate *isolate = info.GetIsolate();
 
     if (info.Length() != 1)
@@ -260,6 +263,10 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
         return;
     }
 
+#ifdef DEBUG
+    std::cout << "Config::Get unwrapping class" << std::endl;
+#endif
+
     Config *cfg = node::ObjectWrap::Unwrap<Config>(info.Holder());
 
     auto v8Key = info[0]->ToString(isolate->GetCurrentContext());
@@ -274,7 +281,22 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
     //    return env.Null();
     //}
 
-    auto value = cfg->_node[key];
+#ifdef DEBUG
+    std::cout << "Config::Get getting value from config node: " << key << std::endl;
+#endif
+
+    alt::config::Node value;
+    try
+    {
+        value = cfg->_node[key];
+    } catch(alt::config::Error e) {
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
+    }
+
+#ifdef DEBUG
+    std::cout << "Config::Get got config node value" << std::endl;
+#endif
 
     if (value.IsNone())
     {
@@ -292,6 +314,9 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
 
     try
     {
+#ifdef DEBUG
+        std::cout << "Config::Get got to point GetValueUnknownType" << std::endl;
+#endif
         auto v8Value = GetValueUnknownType(isolate, value);
         info.GetReturnValue().Set(v8Value);
         return;
