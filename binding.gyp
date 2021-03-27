@@ -4,7 +4,7 @@
             "cflags": ["-fexceptions"],
             "cflags_cc": ["-fexceptions"],
             "target_name": "config",
-            "sources": ["src/main.cc", "src/config.cc", "src/helper.cc"],
+            "sources": ["src/main.cc", "src/config.cc", "src/helper.cc", "src/alt-node.cc"],
             "include_dirs": ["<!(node -p \"require('node-addon-api').include_dir\")", "deps/alt-config", "include"],
             'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
             "conditions": [
