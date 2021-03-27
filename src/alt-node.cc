@@ -1,4 +1,5 @@
 #include <node.h>
+#include <napi.h>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define ISWIN
 #include <windows.h>
