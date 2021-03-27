@@ -7,7 +7,7 @@
                 "${workspaceFolder}/deps",
                 "${workspaceFolder}/deps/alt-config",
                 "${workspaceFolder}/include",
-                "C:/Users/timob/.node-gyp/11.12.0/include/node"
+                "C:/Users/timob/AppData/Local/node-gyp/Cache/14.15.2/include/node"
             ],
             "intelliSenseMode": "msvc-x64",
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe",

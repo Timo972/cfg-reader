@@ -10,20 +10,41 @@ void Config::Init(v8::Local<v8::Object> exports)
     v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     v8::Local<v8::ObjectTemplate> addon_data_tpl = v8::ObjectTemplate::New(isolate);
-    addon_data_tpl->SetInternalFieldCount(1);
+    addon_data_tpl->SetInternalFieldCount(2);
     v8::Local<v8::Object> addon_data = addon_data_tpl->NewInstance(context).ToLocalChecked();
 
     v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, New, addon_data);
-    tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Config"));
-    tpl->InstanceTemplate()->SetInternalFieldCount(1);
+    tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Config").ToLocalChecked());
+    tpl->InstanceTemplate()->SetInternalFieldCount(2);
 
-    NODE_SET_PROTOTYPE_METHOD(tpl, "Get", Get);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "get", Get);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "getOfType", GetOfType);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "set", Set);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "save", Save);
 
     v8::Local<v8::Function> constructor = tpl->GetFunction(context).ToLocalChecked();
     addon_data->SetInternalField(0, constructor);
 
-    exports->Set(context, v8::String::NewFromUtf8(isolate, "Config"), constructor).FromJust();
+    exports->Set(context, v8::String::NewFromUtf8(isolate, "Config").ToLocalChecked(), constructor).FromJust();
 };
+
+Config::Config(std::string fileName) : _name(fileName)
+{
+    auto node = altWrapper::Load(this->_name);
+
+    if (node == false)
+    {
+
+        //Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
+        return;
+    }
+
+    this->_node = node;
+}
+
+Config::~Config()
+{
+}
 
 void Config::New(const v8::FunctionCallbackInfo<v8::Value> &args)
 {
@@ -34,17 +55,23 @@ void Config::New(const v8::FunctionCallbackInfo<v8::Value> &args)
     {
         if (!args[0]->IsString() || args.Length() != 1)
         {
-            isolate->ThrowException(v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "Invalid params passed")));
+            isolate->ThrowException(v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "Invalid params passed").ToLocalChecked()));
             return;
         }
 
-        v8::Local<v8::String> fileName = args[0]->ToString(isolate);
+        v8::Local<v8::String> fileName = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+        v8::String::Utf8Value const str(isolate, fileName);
 
-        
+        std::string name = std::string(*str, str.length());
+
+        Config *cfg = new Config(name);
+
+        cfg->Wrap(args.This());
+        args.GetReturnValue().Set(args.This());
     }
 }
 
-Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
+/*Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
 {
     Napi::Env env = info.Env();
 
@@ -84,24 +111,32 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
     }
 
     this->_node = node;
-};
+};*/
 
-Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node value)
+v8::Local<v8::Value> Config::GetValueOfType(v8::Isolate *isolate, int type, alt::config::Node value)
 {
     if (type == 0 && !value.IsDict() && !value.IsList())
     {
         auto boolean = value.ToBool();
-        return Napi::Boolean::New(env, boolean);
+        return v8::Boolean::New(isolate, boolean);
     }
     else if (type == 1 && !value.IsDict() && !value.IsList())
     {
         auto number = value.ToNumber();
-        return Napi::Number::New(env, number);
+        return v8::Number::New(isolate, number);
     }
     else if (type == 2 && !value.IsDict() && !value.IsList())
     {
         auto string = value.ToString();
-        return Napi::String::New(env, string);
+#ifdef DEBUG
+        std::cout << "Config::GetValueOfType type string: " << string << std::endl;
+#endif
+        auto v8String = v8::String::NewFromUtf8(isolate, string.c_str()).ToLocalChecked();
+        v8::String::Utf8Value const str(isolate, v8String);
+#ifdef DEBUG
+        std::cout << "Config::GetValueOfType v8 string: " << std::string(*str, str.length()) << std::endl;
+#endif
+        return v8String;
     }
     else if (type == 4 && value.IsDict() && !value.IsList())
     {
@@ -109,7 +144,7 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
         std::cout << "Config::GetValueOfType is now parsing a dict\n";
 #endif
         auto dict = value.ToDict();
-        Napi::Object jsDict = Napi::Object::New(env);
+        auto jsDict = v8::Object::New(isolate);
 
         for (alt::config::Node::Dict::iterator node = dict.begin(); node != dict.end(); ++node)
         {
@@ -121,14 +156,13 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
 #ifdef DEBUG
                 std::cout << "Config::GetValueOfType parse dict key value: " << second.ToString() << "\n";
 #endif
-                auto jsVal = GetValueUnknownType(env, second);
-
-                jsDict.Set(first, jsVal);
+                auto jsVal = GetValueUnknownType(isolate, second);
+                jsDict->Set(isolate->GetCurrentContext(), v8::String::NewFromUtf8(isolate, first.c_str()).ToLocalChecked(), jsVal);
             }
             catch (...)
             {
                 const std::string errorMsg = std::string("Unsupported value in dict for key: " + first);
-                Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
+                isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, errorMsg.c_str()).ToLocalChecked()));
             }
         }
 
@@ -137,7 +171,7 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
     else if (type == 3 && !value.IsDict() && value.IsList())
     {
         auto list = value.ToList();
-        Napi::Array jsList = Napi::Array::New(env);
+        auto jsList = v8::Array::New(isolate);
 
 #ifdef DEBUG
         std::cout << "Config::GetValueOfType is now parsing a list \n";
@@ -146,17 +180,17 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
         for (alt::config::Node::List::iterator node = list.begin(); node != list.end(); ++node)
         {
 #ifdef DEBUG
-            std::cout << "Config::GetValueOfType list parsing got to index " << jsList.Length() << "\n";
+            std::cout << "Config::GetValueOfType list parsing got to index " << jsList->Length() << "\n";
 #endif
             try
             {
-                auto val = GetValueUnknownType(env, *node);
-                jsList.Set(jsList.Length(), val);
+                auto val = GetValueUnknownType(isolate, *node);
+                jsList->Set(isolate->GetCurrentContext(), jsList->Length(), val);
             }
             catch (...)
             {
 #ifdef DEBUG
-                std::cout << "Config::GetValueOfType could not parse list item type at index: " << jsList.Length() << "\n";
+                std::cout << "Config::GetValueOfType could not parse list item type at index: " << jsList->Length() << "\n";
 #endif
                 //const std::string errorMsg = std::string("Unsupported value in list at index: " + std::to_string(jsList.Length()));
                 //Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
@@ -167,12 +201,12 @@ Napi::Value Config::GetValueOfType(Napi::Env env, int type, alt::config::Node va
     }
     else
     {
-        Napi::TypeError::New(env, "Invalid type passed at Config::GetValueOfType").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Invalid type passed at Config::GetValueOfType").ToLocalChecked()));
+        return v8::Null(isolate);
     }
 }
 
-Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
+v8::Local<v8::Value> Config::GetValueUnknownType(v8::Isolate *isolate, alt::config::Node value)
 {
 
     if (value.IsDict())
@@ -180,12 +214,12 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
 #ifdef DEBUG
         std::cout << "Config::GetValueUnknownType recieved dict to parse\n";
 #endif
-        return GetValueOfType(env, 4, value);
+        return GetValueOfType(isolate, 4, value);
     }
     else if (value.IsList())
     {
 
-        return GetValueOfType(env, 3, value);
+        return GetValueOfType(isolate, 3, value);
     }
 
     for (int i = 0; i < 5; i++)
@@ -195,7 +229,7 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
 #endif
         try
         {
-            return GetValueOfType(env, i, value);
+            return GetValueOfType(isolate, i, value);
         }
         catch (...)
         {
@@ -205,26 +239,33 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
         }
     }
 
-    return env.Null();
+    return v8::Null(isolate);
 }
 
 void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
-    Napi::Env env = info.Env();
+    v8::Isolate *isolate = info.GetIsolate();
 
     if (info.Length() != 1)
     {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    if (!info[0].IsString())
+    if (!info[0]->IsString())
     {
-        Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    auto key = info[0].As<Napi::String>().Utf8Value();
+    Config *cfg = node::ObjectWrap::Unwrap<Config>(info.Holder());
+
+    auto v8Key = info[0]->ToString(isolate->GetCurrentContext());
+    v8::String::Utf8Value const str(isolate, v8Key.ToLocalChecked());
+
+    std::string key = std::string(*str, str.length());
 
     //const char* type = typeid(this->_node).name;
     //const char* nodeType = "Node";
@@ -233,11 +274,15 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
     //    return env.Null();
     //}
 
-    auto value = this->_node[key];
+    auto value = cfg->_node[key];
 
     if (value.IsNone())
     {
-        return env.Null();
+#ifdef DEBUG
+        std::cout << "Config::Get value is none" << std::endl;
+#endif
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
     //if (value.IsScalar()) {
@@ -247,117 +292,145 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
 
     try
     {
-        return GetValueUnknownType(env, value);
+        auto v8Value = GetValueUnknownType(isolate, value);
+        info.GetReturnValue().Set(v8Value);
+        return;
     }
     catch (...)
     {
         const std::string errorMsg = std::string("Unsupported value at key: " + key);
-        Napi::Error::New(env, errorMsg).ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, errorMsg.c_str()).ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    return env.Null();
+    info.GetReturnValue().Set(v8::Null(isolate));
+    return;
 };
 
-Napi::Value Config::Set(const Napi::CallbackInfo &info)
+void Config::Set(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
-    Napi::Env env = info.Env();
+    v8::Isolate *isolate = info.GetIsolate();
 
     if (info.Length() != 2)
     {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        return Napi::Boolean::New(env, false);
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Boolean::New(isolate, false));
+        return;
     }
 
-    if (!info[0].IsString())
+    if (!info[0]->IsString())
     {
-        Napi::TypeError::New(env, "Invalid key type").ThrowAsJavaScriptException();
-        return Napi::Boolean::New(env, false);
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Invalid key type").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Boolean::New(isolate, false));
+        return;
     }
 
-    if (!info[1].IsNumber() && !info[1].IsBoolean() && !info[1].IsString())
+    if (!info[1]->IsNumber() && !info[1]->IsBoolean() && !info[1]->IsString())
     {
-        Napi::TypeError::New(env, "Unsupported value type").ThrowAsJavaScriptException();
-        return Napi::Boolean::New(env, false);
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Unsupported value type").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Boolean::New(isolate, false));
+        return;
     }
 
-    std::string key = info[0].As<Napi::String>().Utf8Value();
+    auto v8Key = info[0]->ToString(isolate->GetCurrentContext());
 
-    if (info[1].IsNumber())
+    v8::String::Utf8Value const str(isolate, v8Key.ToLocalChecked());
+    std::string key = std::string(*str, str.length());
+
+    Config *cfg = node::ObjectWrap::Unwrap<Config>(info.Holder());
+
+    if (info[1]->IsNumber())
     {
-        double value = info[1].As<Napi::Number>().DoubleValue();
-        this->_node[key] = value;
+        double value = info[1]->ToNumber(isolate->GetCurrentContext()).ToLocalChecked()->Value();
+        cfg->_node[key] = value;
     }
-    else if (info[1].IsBoolean())
+    else if (info[1]->IsBoolean())
     {
-        bool value = info[1].As<Napi::Boolean>().Value();
-        this->_node[key] = value;
+        bool value = info[1]->ToBoolean(isolate)->Value();
+        cfg->_node[key] = value;
     }
-    else if (info[1].IsString())
+    else if (info[1]->IsString())
     {
-        std::string value = info[1].As<Napi::String>().Utf8Value();
-        this->_node[key] = value;
+        v8::String::Utf8Value const str(isolate, info[1]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+        std::string value = std::string(*str, str.length());
+        cfg->_node[key] = value;
     }
     else
     {
-        return Napi::Boolean::New(env, false);
+        info.GetReturnValue().Set(v8::Boolean::New(isolate, false));
+        return;
     }
 
-    return Napi::Boolean::New(env, true);
+    info.GetReturnValue().Set(v8::Boolean::New(isolate, true));
+    return;
 };
 
-Napi::Value Config::GetOfType(const Napi::CallbackInfo &info)
+void Config::GetOfType(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
-    Napi::Env env = info.Env();
+    v8::Isolate *isolate = info.GetIsolate();
 
     if (info.Length() != 2)
     {
-        Napi::TypeError::New(env, "Wrong number of arguments").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong number of arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    if (!info[0].IsString())
+    if (!info[0]->IsString())
     {
-        Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    if (!info[1].IsNumber())
+    if (!info[1]->IsNumber())
     {
-        Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
-        return env.Null();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, "Wrong arguments").ToLocalChecked()));
+        info.GetReturnValue().Set(v8::Null(isolate));
+        return;
     }
 
-    int type = info[1].As<Napi::Number>().Int32Value();
-    std::string key = info[0].As<Napi::String>().Utf8Value();
+    int type = info[1]->ToNumber(isolate->GetCurrentContext()).ToLocalChecked()->Int32Value(isolate->GetCurrentContext()).ToChecked();
+    v8::String::Utf8Value const str(isolate, info[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
 
-    auto value = this->_node[key];
+    std::string key = std::string(*str, str.length());
+
+    Config *cfg = node::ObjectWrap::Unwrap<Config>(info.Holder());
+
+    auto value = cfg->_node[key];
 
     try
     {
-        return GetValueOfType(env, type, value);
+        auto v8Value = GetValueOfType(isolate, type, value);
+        info.GetReturnValue().Set(v8Value);
+        return;
     }
     catch (...)
     {
         const std::string errorMsg = std::string("Wrong value type: " + std::to_string(type) + " for key: " + key);
-        Napi::TypeError::New(env, errorMsg).ThrowAsJavaScriptException();
+        isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, errorMsg.c_str()).ToLocalChecked()));
     }
 
-    return env.Null();
+    info.GetReturnValue().Set(v8::Null(isolate));
+    return;
 };
 
-Napi::Value Config::Save(const Napi::CallbackInfo &info)
+void Config::Save(const v8::FunctionCallbackInfo<v8::Value> &info)
 {
-    Napi::Env env = info.Env();
+    v8::Isolate *isolate = info.GetIsolate();
 
     try
     {
-        altWrapper::Save(this->_name, this->_node);
+        Config *cfg = node::ObjectWrap::Unwrap<Config>(info.Holder());
+        altWrapper::Save(cfg->_name, cfg->_node);
     }
     catch (...)
     {
-        return Napi::Boolean::New(env, false);
+        info.GetReturnValue().Set(v8::Boolean::New(isolate, false));
+        return;
     }
 
-    return Napi::Boolean::New(env, true);
+    info.GetReturnValue().Set(v8::Boolean::New(isolate, true));
+    return;
 }
