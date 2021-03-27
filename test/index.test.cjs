@@ -42,43 +42,43 @@ describe("Working with existing config file in cjs", () => {
     });
 
     it("Get already existing value", () => {
-        const val = config.Get(existingKey);
+        const val = config.get(existingKey);
         assert.strictEqual(val, existingValue, `Wrong value returned:\nexpected type: ${typeof(existingValue)}\ngot type: ${typeof(val)}\nexpected value: ${existingValue}\ngot value: ${val}`);
     });
 
     it("Get existing dict", () => {
         //console.log(fs.readFileSync(fileName, 'utf8'));
-        const val = config.Get(existingDictKey);
+        const val = config.get(existingDictKey);
         assert.deepStrictEqual(val, { test: 3 }, `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`);
     });
 
     it("Get existing list", () => {
-        const val = config.Get(existingListKey);
+        const val = config.get(existingListKey);
         assert.deepStrictEqual(val, [true,'hello',4], `Failed to parse list:\nexpected: ${JSON.stringify([true,'hello',4])}\ngot: ${JSON.stringify(val)}\ngot type: ${typeof(val)}`);
     });
 
     it("Set new value", () => {
-        const success = config.Set(newKey, newVal);
+        const success = config.set(newKey, newVal);
         assert.strictEqual(success, true, "Error while setting key/value");
     });
 
     it("Check if new value got setted", () => {
-        const val = config.Get(newKey);
+        const val = config.get(newKey);
         assert.strictEqual(val, newVal, "Failed to set new value");
     });
 
     it("Overwrite an existing value", () => {
-        const success = config.Set(existingKey, overwriteVal);
+        const success = config.set(existingKey, overwriteVal);
         assert.strictEqual(success, true, "Error while overwriting an existing key/value");
     });
 
     it("Check if overwritten value got updated", () => {
-        const val = config.Get(existingKey);
+        const val = config.get(existingKey);
         assert.strictEqual(val, overwriteVal, "Failed to overwrite value");
     });
 
     it("Save changes to file", () => {
-        const success = config.Save();
+        const success = config.save();
         assert.strictEqual(success, true, "Could not save changes to file");
     });
 

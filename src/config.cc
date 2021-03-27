@@ -6,7 +6,7 @@
 
 Napi::Object Config::Init(Napi::Env env, Napi::Object exports)
 {
-    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("Get"), InstanceMethod<&Config::GetOfType>("GetOfType"), InstanceMethod<&Config::Set>("Set"), InstanceMethod<&Config::Save>("Save")});
+    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("get"), InstanceMethod<&Config::GetOfType>("getOfType"), InstanceMethod<&Config::Set>("set"), InstanceMethod<&Config::Save>("save")});
 
     Napi::FunctionReference *constructor = new Napi::FunctionReference();
 
