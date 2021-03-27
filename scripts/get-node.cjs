@@ -68,7 +68,7 @@ async function main() {
       );
   }
 
-  fs.rmSync(zipFile);
+  fs.unlinkSync(zipFile);
 }
 
 main();
