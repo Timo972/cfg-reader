@@ -35,24 +35,24 @@ declare module "cfg-reader" {
          * @param key {string}
          * @returns {ConfigValue}
          */
-        public Get(key: string): ConfigValue;
+        public get(key: string): ConfigValue;
         /**
          * Set a config value
          * @param key {string}
          * @param value {any}
          */
-        public Set(key: string, value: ConfigValue): void;
+        public set(key: string, value: ConfigValue): void;
         /**
          * Save the current changes to the opened file
          */
-        public Save(): boolean;
+        public save(): boolean;
         /**
          * Get a config value with known type, faster than normal Get
          * @param key {string}
          * @param type {ValueType}
          * @returns {ConfigValue}
          */
-        public GetOfType(key: string, type: ValueType | number): ConfigValue;
+        public getOfType(key: string, type: ValueType | number): ConfigValue;
     }
 
 }
