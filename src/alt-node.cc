@@ -9,7 +9,7 @@ typedef void (CALLBACK* NODE_MODULE_REGISTER_FUNC)(void *);
 #endif
 
 #ifdef ISWIN
-extern "C" NODE_EXTERN void node_module_register(void *mod)
+extern "C" __declspec(dllexport) void node_module_register(void *mod)
 {
 
     auto base_ptr = GetModuleHandle("libnode.dll");
