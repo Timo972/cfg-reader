@@ -1,6 +1,6 @@
 {
   "name": "cfg-reader",
-  "version": "2.0.0-alt1",
+  "version": "2.0.0-alt0",
   "description": "A .cfg file reader",
   "main": "index.cjs",
   "module": "index.mjs",
