@@ -1,6 +1,6 @@
 {
   "name": "cfg-reader",
-  "version": "2.0.0-alt0",
+  "version": "2.0.0-alt1",
   "description": "A .cfg file reader",
   "main": "index.cjs",
   "module": "index.mjs",
@@ -13,7 +13,7 @@
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "install": "node-gyp-build",
+    "install": "echo \"alt-version is prebuild, have fun :)\"",
     "postinstall": "echo \"should be built already\"",
     "build": "node scripts/get-node.cjs && node scripts/build.cjs",
     "configure": "node-gyp configure --nodedir ./deps/alt-node",
