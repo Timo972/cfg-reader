@@ -29,7 +29,7 @@ npm i --save cfg-reader@alt
 ```js
 const { Config } = require('cfg-reader');
 const myCfg = new Config('config.cfg');
-myCfg.Get('test');
+myCfg.get('test');
 //with the get method you can easiely filter the lines you need
 ```
 
@@ -37,11 +37,11 @@ myCfg.Get('test');
 const { Config, Type } = require('cfg-reader');
 const testCfg = new Config('test.cfg');
 // If you know which type the value you want to get has you can use
-// GetOfType(key: string, type: number).
+// getOfType(key: string, type: number).
 // It directly converts the value to the right type 
 // and does not have to iterate over all possible types.
 // -> little faster
-testCfg.GetOfType('test', Type.String);
+testCfg.getOfType('test', Type.String);
 ```
 
 ## Differences between v1
@@ -79,7 +79,7 @@ const config = new require('cfg-reader').Config('config.cfg');
 // equal to es6
 // import { Config } from 'cfg-reader';
 // const config = new Config('config.cfg');
-const con = mysql.createConnection(config.Get('mysql'));
+const con = mysql.createConnection(config.get('mysql'));
 ...
 ```
 ## or
@@ -100,13 +100,13 @@ const mysql = require('mysql2');
 const { Config, Type } = require('cfg-reader');
 const config = new Config('config.cfg');
 const con = mysql.createConnection({
-    host: config.GetOfType('mysql_host', Type.String),
-    user: config.Get('mysql_user'),
-    password: config.Get('mysql_password'),
-    database: config.Get('mysql_database'),
-    waitForConnections: config.GetOfType('mysql_wait', Type.Boolean),
-    connectionLimit: config.GetOfType('mysql_climit', Type.Number),
-    queueLimit: config.Get('mysql_qlimit')
+    host: config.getOfType('mysql_host', Type.String),
+    user: config.get('mysql_user'),
+    password: config.get('mysql_password'),
+    database: config.get('mysql_database'),
+    waitForConnections: config.getOfType('mysql_wait', Type.Boolean),
+    connectionLimit: config.getOfType('mysql_climit', Type.Number),
+    queueLimit: config.get('mysql_qlimit')
 });
 ...
 ```
