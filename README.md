@@ -12,6 +12,9 @@
 ## Important
 - You can only set integers, booleans and strings via the set method currently
 - If you want to use this module inside of an alt:V Server script, follow the corresponding installation
+- This module is built against the latest alt:V Node Version, which is currently only used in dev branch.
+  That means you cant use this module in rc or release branch until alt:V merges dev.
+  If you need this module in release you should use v1.3.2 or built it manually with the wanted node-version.
 
 ## Installation
 

@@ -1,6 +1,5 @@
 .github
 .vscode
-build
 cache
 crashdumps
 data
@@ -13,3 +12,8 @@ jsconfig.json
 server.cfg
 server.log
 update.json
+deps
+test
+scripts
+include
+src

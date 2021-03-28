@@ -7,11 +7,9 @@ altv-server.exe
 altv-server
 modules
 data
-server.cfg
 server.log
 .altvrc
 update.json
-resources
 crashdumps
 cache
 jsconfig.json
