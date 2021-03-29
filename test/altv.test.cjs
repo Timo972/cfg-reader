@@ -15,7 +15,7 @@ describe('Check compability with alt:V JS Runtime', () => {
         });
     });
     it("Run alt:V Server without problems", (done) => {
-        spawn(`${process.platform === 'linux' ? 'altv-server' : 'altv-server.exe'}`, {
+        spawn(`${process.platform === 'linux' ? './altv-server' : 'altv-server.exe'}`, {
             cwd: __dirname,
             shell: true
         }).on('exit', (code, signal) => {

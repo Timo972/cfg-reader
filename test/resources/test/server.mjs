@@ -1,8 +1,18 @@
 import * as alt from "alt-server";
-import { Config } from "../../../index.mjs";
+import { Config, Type } from "../../../index.mjs";
 
 alt.log("Hello World");
 
-alt.log(new Config('server.cfg').get('name'));
+const cfg = new Config('server.cfg');
+
+alt.log(cfg.get('name'));
+
+alt.log(cfg.getOfType('name', Type.String));
+
+alt.log(cfg.set('name', Math.random()+''));
+
+cfg.save();
+
+alt.log(cfg.get('name'));
 
 process.exit(0);

@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
-const pkgJson = require("../package.json");
 
 if (process.platform !== "linux" && process.platform !== "win32")
   throw new Error(
@@ -14,7 +13,7 @@ const nodePath =
     ? "./deps/alt-node"
     : path.join(__dirname, "..", "deps", "alt-node");
 
-const proc = spawn(`npx node-gyp rebuild --nodedir ${nodePath}`, {
+const proc = spawn(`npx node-gyp rebuild --nodedir ${path.normalize(nodePath)}`, {
   cwd: process.cwd(),
   shell: true,
 });
