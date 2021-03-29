@@ -10,12 +10,12 @@ void Config::Init(v8::Local<v8::Object> exports)
     v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     v8::Local<v8::ObjectTemplate> addon_data_tpl = v8::ObjectTemplate::New(isolate);
-    addon_data_tpl->SetInternalFieldCount(2);
+    addon_data_tpl->SetInternalFieldCount(1);
     v8::Local<v8::Object> addon_data = addon_data_tpl->NewInstance(context).ToLocalChecked();
 
     v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, New, addon_data);
     tpl->SetClassName(v8::String::NewFromUtf8(isolate, "Config").ToLocalChecked());
-    tpl->InstanceTemplate()->SetInternalFieldCount(2);
+    tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
     NODE_SET_PROTOTYPE_METHOD(tpl, "get", Get);
     NODE_SET_PROTOTYPE_METHOD(tpl, "getOfType", GetOfType);
