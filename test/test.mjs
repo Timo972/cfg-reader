@@ -8,6 +8,18 @@ const existingValue = 'testval';
 const existingDictKey = 'myDict';
 const existingDictValue = 'test: 3';
 
+const existingEmptyDictKey = 'mtDict';
+const existingEmptyDictValue = '{}';
+
+const existingInlineDictKey = 'inlineDict';
+const existingInlineDictValue = '{test:4}';
+
+const existingEmptyListKey = 'mtList';
+const existingEmptyListValue = `[]`;
+
+const existingInlineListKey = 'inlineList';
+const existingInlineListValue = `[true, 'hello', 4]`;
+
 const existingListKey = 'myList';
 const existingListValue = `[
     true, 
@@ -27,9 +39,7 @@ before(() => {
 
     fs.writeFileSync(
         fileName,
-        `${existingKey}:'${existingValue}'\n${existingDictKey}: {
-        ${existingDictValue}
-    }\n${existingListKey}:${existingListValue}`,
+        `${existingEmptyListKey}:${existingEmptyListValue}\n${existingKey}:'${existingValue}'\n${existingDictKey}: {\n${existingDictValue}\n}\n${existingListKey}:${existingListValue}\n${existingInlineListKey}:${existingInlineListValue}\n${existingEmptyDictKey}:${existingEmptyDictValue}\n${existingInlineDictKey}:${existingInlineDictValue}`,
         {
             encoding: 'utf8',
         },
@@ -37,7 +47,7 @@ before(() => {
 });
 
 after(() => {
-    if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
+    //if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 });
 
 describe('Working with existing config file in es6', () => {
