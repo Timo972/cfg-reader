@@ -3,7 +3,7 @@ import { strict as assert } from 'assert';
 import fs from 'fs';
 
 const existingKey = 'test';
-const existingValue = '"testval\',';
+const existingValue = 'testval';
 
 const existingDictKey = 'myDict';
 const existingDictValue = 'test: 3';
