@@ -164,11 +164,25 @@ export class Config {
             if (parsedLine != null) this.config[parsedLine[0]] = parsedLine[1];
         }
     }
-    protected serializeObject(value: ConfigObject): string {
-        return `{}`;
+    protected serializeObject(obj: ConfigObject, main = false): string {
+        let serializedConfig = '';
+        for (const key in obj) {
+            const value = obj[key];
+            // parse different types
+            const serialized = this.serialzeOfUnknownType(value);
+
+            // add to string
+            serializedConfig += `${key}: ${serialized}\n`;
+        }
+        return !main ? `{\n${serializedConfig}}` : serializedConfig;
     }
-    protected serializeArray(value: Array<number | string | boolean>): string {
-        return `[]`;
+    protected serializeArray(arr: Array<number | string | boolean>): string {
+        const serializedValues = [];
+        for (const value in arr) {
+            const serialized = this.serialzeOfUnknownType(value);
+            serializedValues.push(serialized);
+        }
+        return `[\n${serializedValues.join('\n')}]`;
     }
     protected serializeNumber(value: number): string {
         return String(value);
@@ -179,37 +193,28 @@ export class Config {
     protected serializeBoolean(value: boolean): string {
         return String(value);
     }
-    protected serialize(): string {
-        let serializedConfig = '';
-
-        for (const key in this.config) {
-            console.log(key);
-            const value = this.config[key];
-            let serialized: string;
-
-            // parse different types
-            switch (typeof value) {
-                case 'object':
-                    serialized = value instanceof Array ? this.serializeArray(value) : this.serializeObject(value);
-                    break;
-                case 'number':
-                    serialized = this.serializeNumber(value);
-                    break;
-                case 'string':
-                    serialized = this.serializeString(value);
-                    break;
-                case 'boolean':
-                    serialized = this.serializeBoolean(value);
-                    break;
-                default:
-                    throw new Error(`Invalid value type: ${typeof value}, at key: ${key}`);
-            }
-
-            // add to string
-            serializedConfig += `${key}: ${serialized}\n`;
+    protected serialzeOfUnknownType(value: any): string {
+        let serialized: string;
+        switch (typeof value) {
+            case 'object':
+                serialized = value instanceof Array ? this.serializeArray(value) : this.serializeObject(value);
+                break;
+            case 'number':
+                serialized = this.serializeNumber(value);
+                break;
+            case 'string':
+                serialized = this.serializeString(value);
+                break;
+            case 'boolean':
+                serialized = this.serializeBoolean(value);
+                break;
+            default:
+                throw new Error(`Invalid value type: ${typeof value}, value: ${value}`);
         }
-
-        return serializedConfig;
+        return serialized;
+    }
+    protected serialize(): string {
+        return this.serializeObject(this.config, true);
     }
     public get(key: string): any {
         return key in this.config ? this.config[key] : null;
