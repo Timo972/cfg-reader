@@ -175,7 +175,7 @@ export class Config {
         return true;
     }
     save(): boolean {
-        console.warn(`[cfg-reader] Config::save is not implemented yet!`)
+        console.warn(`[cfg-reader] Config::save is not implemented yet!`);
         return true;
     }
 }
