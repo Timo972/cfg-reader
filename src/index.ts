@@ -164,19 +164,78 @@ export class Config {
             if (parsedLine != null) this.config[parsedLine[0]] = parsedLine[1];
         }
     }
-    get(key: string): any {
+    protected serializeObject(value: ConfigObject): string {
+        return `{}`;
+    }
+    protected serializeArray(value: Array<number | string | boolean>): string {
+        return `[]`;
+    }
+    protected serializeNumber(value: number): string {
+        return String(value);
+    }
+    protected serializeString(value: string): string {
+        return `'${value}'`;
+    }
+    protected serializeBoolean(value: boolean): string {
+        return String(value);
+    }
+    protected serialize(): string {
+        let serializedConfig = '';
+
+        for (const key in this.config) {
+            console.log(key);
+            const value = this.config[key];
+            let serialized: string;
+
+            // parse different types
+            switch (typeof value) {
+                case 'object':
+                    serialized = value instanceof Array ? this.serializeArray(value) : this.serializeObject(value);
+                    break;
+                case 'number':
+                    serialized = this.serializeNumber(value);
+                    break;
+                case 'string':
+                    serialized = this.serializeString(value);
+                    break;
+                case 'boolean':
+                    serialized = this.serializeBoolean(value);
+                    break;
+                default:
+                    throw new Error(`Invalid value type: ${typeof value}, at key: ${key}`);
+            }
+
+            // add to string
+            serializedConfig += `${key}: ${serialized}\n`;
+        }
+
+        return serializedConfig;
+    }
+    public get(key: string): any {
         return key in this.config ? this.config[key] : null;
     }
-    has(key: string): boolean {
+    public has(key: string): boolean {
         return key in this.config;
     }
-    set(key: string, value: any): boolean {
+    public set(key: string, value: any): boolean {
         this.config[key] = value;
         return true;
     }
-    save(): boolean {
-        console.warn(`[cfg-reader] Config::save is not implemented yet!`);
-        return true;
+    public save(): boolean {
+        try {
+            const content = this.serialize();
+
+            if (typeof this.path !== 'string') {
+                throw new Error('This config does not have a valid path');
+            }
+
+            fs.writeFileSync(this.path, content, { encoding: 'utf8' });
+
+            return true;
+        } catch (e) {
+            console.error(e);
+            return false;
+        }
     }
 }
 
