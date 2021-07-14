@@ -101,5 +101,8 @@ describe('Working with existing config file in es6', () => {
     it('Save changes to file', () => {
         const success = config.save();
         assert.strictEqual(success, true, 'Could not save changes to file');
+        const updatedConfig = new Config(fileName);
+        const updatedValue = updatedConfig.get(existingKey);
+        assert.strictEqual(updatedValue, overwriteVal, 'Changes not applied');
     });
 });
