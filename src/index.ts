@@ -113,7 +113,7 @@ export class Config {
             this.lineCache.push(lKey);
             //this.lineCache.push(lValue.includes(']') || lValue.includes('}') ? lValue : lValue.replace(/,/g, ''));
             console.log(lValue);
-            if (lValue.startsWith('[') && lValue.endsWith(']')) {
+            if ((lValue.startsWith('[') && lValue.endsWith(']')) || (lValue.startsWith('{') && lValue.endsWith('}'))) {
                 // when dict / list is inline, split up
                 const inlineValues = lValue
                     .slice(1, lValue.length - 1)
@@ -132,9 +132,11 @@ export class Config {
         if (this.lineCache.length > 0) {
             switch (this.lineCache[0]) {
                 case '0':
+                    console.log('process inline list');
                     this.lineCache = [];
                     return [lKey, []];
                 case '1':
+                    console.log('process inline dict');
                     this.lineCache = [];
                     return [lKey, {}];
                 default:
