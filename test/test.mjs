@@ -12,7 +12,7 @@ const existingEmptyDictKey = 'mtDict';
 const existingEmptyDictValue = '{}';
 
 const existingInlineDictKey = 'inlineDict';
-const existingInlineDictValue = '{test:4}';
+const existingInlineDictValue = '{inline:true}';
 
 const existingEmptyListKey = 'mtList';
 const existingEmptyListValue = `[]`;
@@ -92,7 +92,7 @@ describe('Working with existing config file in es6', () => {
         const val = config.get(existingInlineDictKey);
         assert.deepStrictEqual(
             val,
-            { test: 3 },
+            { inline: true },
             `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
         );
     });
