@@ -20,27 +20,25 @@ export class Config {
         if (typeof this.path === 'string') this.parse();
         else this.config = this.path;
     }
-    protected processListEnding(
-        seperator: string = null,
-        lineNumber = 0,
-    ): [string, Array<string | boolean | number>] | null {
+    protected extractLineCacheValues(filter: string, seperator: string = null): string[] {
+        return seperator == null
+            ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== filter)
+            : this.lineCache
+                  .slice(2, this.lineCache.length)
+                  .filter((x) => x !== filter)
+                  .join(seperator)
+                  .trim()
+                  .replace(/\s/g, '')
+                  .split(seperator);
+    }
+    protected processListEnding(seperator: string = null, lineNumber = 0): [string, Array<string | boolean | number>] {
         if (this.lineCache[0] !== '0') {
-            console.log('DEBUG (processListEnding): lineCache', this.lineCache);
             throw new Error(`Invalid config syntax! Check line: ${lineNumber}`);
         }
         // end of list
         // process list through lineCache
         const key = this.lineCache[1];
-        const values =
-            seperator == null
-                ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '[')
-                : this.lineCache
-                      .slice(2, this.lineCache.length)
-                      .filter((x) => x !== '[')
-                      .join(seperator)
-                      .trim()
-                      .replace(/\s/g, '')
-                      .split(seperator);
+        const values = this.extractLineCacheValues('[', seperator);
 
         this.lineCache = [];
 
@@ -53,24 +51,14 @@ export class Config {
 
         return [key, parsed];
     }
-    protected processDictEnding(seperator: string = null, lineNumber = 0): [string, ConfigObject] | null {
+    protected processDictEnding(seperator: string = null, lineNumber = 0): [string, ConfigObject] {
         if (this.lineCache[0] !== '1') {
-            console.log('DEBUG (processDictEnding): lineCache', this.lineCache);
             throw new Error(`Invalid config syntax! Check line: ${lineNumber}`);
         }
         // end of dict
         // process dict through lineCache
         const key = this.lineCache[1];
-        const values =
-            seperator == null
-                ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '{')
-                : this.lineCache
-                      .slice(2, this.lineCache.length)
-                      .filter((x) => x !== '{')
-                      .join(seperator)
-                      .trim()
-                      .replace(/\s/g, '')
-                      .split(seperator);
+        const values = this.extractLineCacheValues('{', seperator);
 
         this.lineCache = [];
 
@@ -104,7 +92,12 @@ export class Config {
 
         const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
-        const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
+        const lValue =
+            lSplitted.length > 1
+                ? lSplitted.length > 2
+                    ? lSplitted.slice(1, lSplitted.length).join(':')
+                    : lSplitted[1]
+                : lSplitted[0];
 
         if (lValue.startsWith('[') || lValue.startsWith('{')) {
             // begin of list (0) / dict (1)^
@@ -112,40 +105,30 @@ export class Config {
             this.lineCache.push(lValue.startsWith('{') ? '1' : '0');
             this.lineCache.push(lKey);
             //this.lineCache.push(lValue.includes(']') || lValue.includes('}') ? lValue : lValue.replace(/,/g, ''));
-            console.log(lValue);
             if ((lValue.startsWith('[') && lValue.endsWith(']')) || (lValue.startsWith('{') && lValue.endsWith('}'))) {
                 // when dict / list is inline, split up
                 const inlineValues = lValue
                     .slice(1, lValue.length - 1)
                     .split(',')
                     .filter((val) => val != '');
-                console.log('inlineValues:', inlineValues);
                 if (inlineValues.length > 0) this.lineCache.push(...inlineValues);
-                else console.log('empty inlineValues');
             } else {
                 this.lineCache.push(lValue);
                 return null;
             }
         }
 
-        // check if
+        // check if inline processing is needed
         if (this.lineCache.length > 0) {
             switch (this.lineCache[0]) {
                 case '0':
-                    console.log('process inline list');
-                    this.lineCache = [];
-                    return [lKey, []];
+                    return this.processListEnding(null, index);
                 case '1':
-                    console.log('process inline dict');
-                    this.lineCache = [];
-                    return [lKey, {}];
+                    return this.processDictEnding(null, index);
                 default:
                     throw new Error('Unknown internal type! Maybe caused by invalid syntax');
             }
         }
-
-        //const dictOrListInline = this.processDictOrList(line, ',');
-        //if (dictOrListInline != null) return dictOrList;
 
         return [
             lKey,
@@ -195,20 +178,13 @@ export class Config {
     protected parse(): void {
         this.config = {};
 
-        console.log('parse() called');
-
         if (typeof this.path !== 'string') return;
-
-        console.log('reading config');
 
         const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
 
         const lines = fileContent.split('\n');
 
-        console.log('looping lines:', lines.length);
-
         for (let line = 0; line < lines.length; line++) {
-            console.log(`line ${line}: ${lines[line]}`);
             const parsedLine = this.parseLine(lines[line], line);
             if (parsedLine != null) this.config[parsedLine[0]] = parsedLine[1];
         }
