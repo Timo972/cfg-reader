@@ -27,21 +27,14 @@ config.get('some_property');
 
 ## Notice
 
- - The save method is not working rn
+ - ~~The save method is not working rn~~ implemented
  - Commas at the end are optional
- - Inline keys are **not** supported (``mysql: { host: 127.0.0.1 }``) currently
+ - ~~Inline keys are currently **not** supported (``mysql: { host: 127.0.0.1 }``)~~ should work now
  - For more information take a look at [alt:V Config docs](https://docs.altv.mp/articles/configs/index.html)
 
 ## Example
 
 config.cfg
-```cfg
-mysql_host: 127.0.0.1,
-mysql_user: root,
-mysql_password: test123,
-mysql_database: db
-```
-__or__
 ```cfg
 mysql: {
     host: 127.0.0.1,
@@ -60,8 +53,11 @@ const con = mysql.createConnection(config.get('mysql'));
 ```
 
 ## Todo
-- [ ] create stringify method
-- [ ] support inline dicts and lists
+- [x] create stringify (serialization) method
+- [x] support inline dicts and lists
+- [ ] more tests
+- [ ] test workflow every push
+- [ ] possibility to change path
 
 [npm-image]: https://img.shields.io/npm/v/cfg-reader.svg
 [npm-url]: https://npmjs.org/package/cfg-reader
