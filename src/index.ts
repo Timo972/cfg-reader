@@ -203,11 +203,11 @@ export class Config {
     }
     protected serializeArray(arr: Array<number | string | boolean>): string {
         const serializedValues = [];
-        for (const value in arr) {
+        for (const value of arr) {
             const serialized = this.serialzeOfUnknownType(value);
             serializedValues.push(serialized);
         }
-        return `[\n${serializedValues.join('\n')}]`;
+        return serializedValues.length > 0 ? `[\n${serializedValues.join('\n')}\n]` : '[]';
     }
     protected serializeNumber(value: number): string {
         return String(value);
