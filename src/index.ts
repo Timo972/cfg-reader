@@ -20,70 +20,69 @@ export class Config {
         if (typeof this.path === 'string') this.parse();
         else this.config = this.path;
     }
-    protected processDictOrList(line: string, seperator: string = null): any | null {
-        if (line.includes(']')) {
-            if (this.lineCache[0] !== '0') throw new Error('Invalid config syntax');
-            // end of list
-            // process list through lineCache
-            const key = this.lineCache[1];
-            const values =
-                seperator == null
-                    ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '[')
-                    : this.lineCache
-                          .slice(2, this.lineCache.length)
-                          .filter((x) => x !== '[')
-                          .join(seperator)
-                          .trim()
-                          .replace(/\s/g, '')
-                          .split(seperator);
+    protected extractLineCacheValues(filter: string, seperator: string = null): string[] {
+        return seperator == null
+            ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== filter)
+            : this.lineCache
+                  .slice(2, this.lineCache.length)
+                  .filter((x) => x !== filter)
+                  .join(seperator)
+                  .trim()
+                  .replace(/\s/g, '')
+                  .split(seperator);
+    }
+    protected processListEnding(seperator: string = null, lineNumber = 0): [string, Array<string | boolean | number>] {
+        if (this.lineCache[0] !== '0') {
+            throw new Error(`Invalid config syntax! Check line: ${lineNumber}`);
+        }
+        // end of list
+        // process list through lineCache
+        const key = this.lineCache[1];
+        const values = this.extractLineCacheValues('[', seperator);
 
-            this.lineCache = [];
+        this.lineCache = [];
 
-            const parsed = [];
+        const parsed = [];
 
-            for (const value of values) {
-                const keyValuePair = this.parseLine(value);
-                if (keyValuePair != null) parsed.push(keyValuePair[1]);
-            }
-
-            return [key, parsed];
-        } else if (line.includes('}')) {
-            if (this.lineCache[0] !== '1') throw new Error('Invalid config syntax');
-            // end of dict
-            // process dict through lineCache
-            const key = this.lineCache[1];
-            const values =
-                seperator == null
-                    ? this.lineCache.slice(2, this.lineCache.length).filter((x) => x !== '{')
-                    : this.lineCache
-                          .slice(2, this.lineCache.length)
-                          .filter((x) => x !== '{')
-                          .join(seperator)
-                          .trim()
-                          .replace(/\s/g, '')
-                          .split(seperator);
-
-            this.lineCache = [];
-
-            const parsed = {};
-
-            for (const value of values) {
-                const keyValuePair = this.parseLine(value);
-                if (keyValuePair != null) parsed[keyValuePair[0]] = keyValuePair[1];
-            }
-
-            return [key, parsed];
+        for (const value of values) {
+            const keyValuePair = this.parseLine(value);
+            if (keyValuePair != null) parsed.push(keyValuePair[1]);
         }
 
-        return null;
+        return [key, parsed];
     }
-    protected parseLine(line: string): [string, any] | null {
+    protected processDictEnding(seperator: string = null, lineNumber = 0): [string, ConfigObject] {
+        if (this.lineCache[0] !== '1') {
+            throw new Error(`Invalid config syntax! Check line: ${lineNumber}`);
+        }
+        // end of dict
+        // process dict through lineCache
+        const key = this.lineCache[1];
+        const values = this.extractLineCacheValues('{', seperator);
+
+        this.lineCache = [];
+
+        const parsed = {};
+
+        for (const value of values) {
+            const keyValuePair = this.parseLine(value);
+            if (keyValuePair != null) parsed[keyValuePair[0]] = keyValuePair[1];
+        }
+
+        return [key, parsed];
+    }
+    protected parseLine(line: string, index?: number): [string, any] | null {
         if (line.startsWith('#')) return;
 
-        //! maybe this has to be checked at the end of this function to support inline lists / dicts
-        const dictOrList = this.processDictOrList(line);
+        // check if multi-line list / dict is ending
+        const dictOrListEnding =
+            line.includes(']') && !line.includes('[')
+                ? this.processListEnding(null, index)
+                : line.includes('}') && !line.includes('{')
+                ? this.processDictEnding(null, index)
+                : null;
 
-        if (dictOrList != null) return dictOrList;
+        if (dictOrListEnding != null) return dictOrListEnding;
 
         if (this.lineCache.length > 0) {
             // collecting data for parsing dict or list, return null to not add to config
@@ -93,19 +92,43 @@ export class Config {
 
         const lSplitted = line.trim().replace(/\s/g, '').split(':');
         const lKey = lSplitted[0];
-        const lValue = lSplitted.length > 1 ? lSplitted[1] : lSplitted[0];
+        const lValue =
+            lSplitted.length > 1
+                ? lSplitted.length > 2
+                    ? lSplitted.slice(1, lSplitted.length).join(':')
+                    : lSplitted[1]
+                : lSplitted[0];
 
         if (lValue.startsWith('[') || lValue.startsWith('{')) {
             // begin of list (0) / dict (1)^
             this.lineCache = [];
             this.lineCache.push(lValue.startsWith('{') ? '1' : '0');
             this.lineCache.push(lKey);
-            this.lineCache.push(lValue.includes(']') || lValue.includes('}') ? lValue : lValue.replace(/,/g, ''));
-            return null;
+            //this.lineCache.push(lValue.includes(']') || lValue.includes('}') ? lValue : lValue.replace(/,/g, ''));
+            if ((lValue.startsWith('[') && lValue.endsWith(']')) || (lValue.startsWith('{') && lValue.endsWith('}'))) {
+                // when dict / list is inline, split up
+                const inlineValues = lValue
+                    .slice(1, lValue.length - 1)
+                    .split(',')
+                    .filter((val) => val != '');
+                if (inlineValues.length > 0) this.lineCache.push(...inlineValues);
+            } else {
+                this.lineCache.push(lValue);
+                return null;
+            }
         }
 
-        const dictOrListInline = this.processDictOrList(line, ',');
-        if (dictOrListInline != null) return dictOrList;
+        // check if inline processing is needed
+        if (this.lineCache.length > 0) {
+            switch (this.lineCache[0]) {
+                case '0':
+                    return this.processListEnding(null, index);
+                case '1':
+                    return this.processDictEnding(null, index);
+                default:
+                    throw new Error('Unknown internal type! Maybe caused by invalid syntax');
+            }
+        }
 
         return [
             lKey,
@@ -159,8 +182,10 @@ export class Config {
 
         const fileContent = fs.readFileSync(path.normalize(this.path), { encoding: 'utf8' });
 
-        for (const line of fileContent.split('\n')) {
-            const parsedLine = this.parseLine(line);
+        const lines = fileContent.split('\n');
+
+        for (let line = 0; line < lines.length; line++) {
+            const parsedLine = this.parseLine(lines[line], line);
             if (parsedLine != null) this.config[parsedLine[0]] = parsedLine[1];
         }
     }

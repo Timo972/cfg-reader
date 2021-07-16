@@ -8,6 +8,18 @@ const existingValue = 'testval';
 const existingDictKey = 'myDict';
 const existingDictValue = 'test: 3';
 
+const existingEmptyDictKey = 'mtDict';
+const existingEmptyDictValue = '{}';
+
+const existingInlineDictKey = 'inlineDict';
+const existingInlineDictValue = '{inline:true}';
+
+const existingEmptyListKey = 'mtList';
+const existingEmptyListValue = `[]`;
+
+const existingInlineListKey = 'inlineList';
+const existingInlineListValue = `[true, 'hello', 4]`;
+
 const existingListKey = 'myList';
 const existingListValue = `[
     true, 
@@ -27,9 +39,7 @@ before(() => {
 
     fs.writeFileSync(
         fileName,
-        `${existingKey}:'${existingValue}'\n${existingDictKey}: {
-        ${existingDictValue}
-    }\n${existingListKey}:${existingListValue}`,
+        `${existingEmptyListKey}:${existingEmptyListValue}\n${existingKey}:'${existingValue}'\n${existingDictKey}: {\n${existingDictValue}\n}\n${existingListKey}:${existingListValue}\n${existingInlineListKey}:${existingInlineListValue}\n${existingEmptyDictKey}:${existingEmptyDictValue}\n${existingInlineDictKey}:${existingInlineDictValue}`,
         {
             encoding: 'utf8',
         },
@@ -37,7 +47,7 @@ before(() => {
 });
 
 after(() => {
-    if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
+    //if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 });
 
 describe('Working with existing config file in es6', () => {
@@ -67,8 +77,50 @@ describe('Working with existing config file in es6', () => {
         );
     });
 
+    it('Get empty dict', () => {
+        //console.log(fs.readFileSync(fileName, 'utf8'));
+        const val = config.get(existingEmptyDictKey);
+        assert.deepStrictEqual(
+            val,
+            {},
+            `Failed to parse dict:\nexpected: ${JSON.stringify({})}\ngot: ${JSON.stringify(val)}`,
+        );
+    });
+
+    it('Get inline dict', () => {
+        //console.log(fs.readFileSync(fileName, 'utf8'));
+        const val = config.get(existingInlineDictKey);
+        assert.deepStrictEqual(
+            val,
+            { inline: true },
+            `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
+        );
+    });
+
     it('Get existing list', () => {
         const val = config.get(existingListKey);
+        assert.deepStrictEqual(
+            val,
+            [true, 'hello', 4],
+            `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+                val,
+            )}\ngot type: ${typeof val}`,
+        );
+    });
+
+    it('Get empty list', () => {
+        const val = config.get(existingEmptyListKey);
+        assert.deepStrictEqual(
+            val,
+            [],
+            `Failed to parse list:\nexpected: ${JSON.stringify([])}\ngot: ${JSON.stringify(
+                val,
+            )}\ngot type: ${typeof val}`,
+        );
+    });
+
+    it('Get inline list', () => {
+        const val = config.get(existingInlineListKey);
         assert.deepStrictEqual(
             val,
             [true, 'hello', 4],
