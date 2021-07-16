@@ -47,7 +47,7 @@ before(() => {
 });
 
 after(() => {
-    //if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
+    if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 });
 
 describe('Existing config', () => {
