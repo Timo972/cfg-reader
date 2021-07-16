@@ -50,111 +50,169 @@ after(() => {
     //if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
 });
 
-describe('Working with existing config file in es6', () => {
-    let config;
+describe('Existing config', () => {
+    describe('Lists', () => {
+        let config;
 
-    it('Open file', () => {
-        config = new Config(fileName);
-        //assert.equal("Get" in Config, true, "Invalid config instance");
-    });
+        it('Open file', () => {
+            config = new Config(fileName);
+        });
 
-    it('Get already existing value', () => {
-        const val = config.get(existingKey);
-        assert.strictEqual(
-            val,
-            existingValue,
-            `Wrong value returned:\nexpected type: ${typeof existingValue}\ngot type: ${typeof val}\nexpected value: ${existingValue}\ngot value: ${val}`,
-        );
-    });
-
-    it('Get existing dict', () => {
-        //console.log(fs.readFileSync(fileName, 'utf8'));
-        const val = config.get(existingDictKey);
-        assert.deepStrictEqual(
-            val,
-            { test: 3 },
-            `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
-        );
-    });
-
-    it('Get empty dict', () => {
-        //console.log(fs.readFileSync(fileName, 'utf8'));
-        const val = config.get(existingEmptyDictKey);
-        assert.deepStrictEqual(
-            val,
-            {},
-            `Failed to parse dict:\nexpected: ${JSON.stringify({})}\ngot: ${JSON.stringify(val)}`,
-        );
-    });
-
-    it('Get inline dict', () => {
-        //console.log(fs.readFileSync(fileName, 'utf8'));
-        const val = config.get(existingInlineDictKey);
-        assert.deepStrictEqual(
-            val,
-            { inline: true },
-            `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
-        );
-    });
-
-    it('Get existing list', () => {
-        const val = config.get(existingListKey);
-        assert.deepStrictEqual(
-            val,
-            [true, 'hello', 4],
-            `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+        it('Get existing list', () => {
+            const val = config.get(existingListKey);
+            assert.deepStrictEqual(
                 val,
-            )}\ngot type: ${typeof val}`,
-        );
-    });
+                [true, 'hello', 4],
+                `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+                    val,
+                )}\ngot type: ${typeof val}`,
+            );
+        });
 
-    it('Get empty list', () => {
-        const val = config.get(existingEmptyListKey);
-        assert.deepStrictEqual(
-            val,
-            [],
-            `Failed to parse list:\nexpected: ${JSON.stringify([])}\ngot: ${JSON.stringify(
+        it('Get empty list', () => {
+            const val = config.get(existingEmptyListKey);
+            assert.deepStrictEqual(
                 val,
-            )}\ngot type: ${typeof val}`,
-        );
-    });
+                [],
+                `Failed to parse list:\nexpected: ${JSON.stringify([])}\ngot: ${JSON.stringify(
+                    val,
+                )}\ngot type: ${typeof val}`,
+            );
+        });
 
-    it('Get inline list', () => {
-        const val = config.get(existingInlineListKey);
-        assert.deepStrictEqual(
-            val,
-            [true, 'hello', 4],
-            `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+        it('Get inline list', () => {
+            const val = config.get(existingInlineListKey);
+            assert.deepStrictEqual(
                 val,
-            )}\ngot type: ${typeof val}`,
-        );
+                [true, 'hello', 4],
+                `Failed to parse list:\nexpected: ${JSON.stringify([true, 'hello', 4])}\ngot: ${JSON.stringify(
+                    val,
+                )}\ngot type: ${typeof val}`,
+            );
+        });
+
+        it('Set list', () => {
+            const success = config.set(existingListKey, [true, 'hello', 5]);
+            assert.strictEqual(success, true, 'Error while setting list');
+        });
+
+        it('Save list', () => {
+            const success = config.save();
+            assert.strictEqual(success, true, 'Could not save changes to file');
+        });
+
+        it('Re-open file', () => {
+            config = new Config(fileName);
+        });
+
+        it('Check serialization', () => {
+            const updatedValue = config.get(existingListKey);
+            assert.deepStrictEqual(updatedValue, [true, 'hello', 5], 'Changes not applied');
+        });
     });
 
-    it('Set new value', () => {
-        const success = config.set(newKey, newVal);
-        assert.strictEqual(success, true, 'Error while setting key/value');
+    describe('Dicts', () => {
+        let config;
+
+        it('Open file', () => {
+            config = new Config(fileName);
+        });
+
+        it('Get existing dict', () => {
+            //console.log(fs.readFileSync(fileName, 'utf8'));
+            const val = config.get(existingDictKey);
+            assert.deepStrictEqual(
+                val,
+                { test: 3 },
+                `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
+            );
+        });
+
+        it('Get empty dict', () => {
+            //console.log(fs.readFileSync(fileName, 'utf8'));
+            const val = config.get(existingEmptyDictKey);
+            assert.deepStrictEqual(
+                val,
+                {},
+                `Failed to parse dict:\nexpected: ${JSON.stringify({})}\ngot: ${JSON.stringify(val)}`,
+            );
+        });
+
+        it('Get inline dict', () => {
+            //console.log(fs.readFileSync(fileName, 'utf8'));
+            const val = config.get(existingInlineDictKey);
+            assert.deepStrictEqual(
+                val,
+                { inline: true },
+                `Failed to parse dict:\nexpected: ${JSON.stringify({ test: true })}\ngot: ${JSON.stringify(val)}`,
+            );
+        });
+
+        it('Set list', () => {
+            const success = config.set(existingDictKey, { overwritten: true });
+            assert.strictEqual(success, true, 'Error while setting list');
+        });
+
+        it('Save dict', () => {
+            const success = config.save();
+            assert.strictEqual(success, true, 'Could not save changes to file');
+        });
+
+        it('Re-open file', () => {
+            config = new Config(fileName);
+        });
+
+        it('Check serialization', () => {
+            const updatedValue = config.get(existingDictKey);
+            assert.deepStrictEqual(updatedValue, { overwritten: true }, 'Changes not applied');
+        });
     });
 
-    it('Check if new value got setted', () => {
-        const val = config.get(newKey);
-        assert.strictEqual(val, newVal, 'Failed to set new value');
-    });
+    describe('Integers, Booleans, Strings', () => {
+        let config;
 
-    it('Overwrite an existing value', () => {
-        const success = config.set(existingKey, overwriteVal);
-        assert.strictEqual(success, true, 'Error while overwriting an existing key/value');
-    });
+        it('Open file', () => {
+            config = new Config(fileName);
+        });
 
-    it('Check if overwritten value got updated', () => {
-        const val = config.get(existingKey);
-        assert.strictEqual(val, overwriteVal, 'Failed to overwrite value');
-    });
+        it('Get existing value', () => {
+            const val = config.get(existingKey);
+            assert.strictEqual(
+                val,
+                existingValue,
+                `Wrong value returned:\nexpected type: ${typeof existingValue}\ngot type: ${typeof val}\nexpected value: ${existingValue}\ngot value: ${val}`,
+            );
+        });
 
-    it('Save changes to file', () => {
-        const success = config.save();
-        assert.strictEqual(success, true, 'Could not save changes to file');
-        const updatedConfig = new Config(fileName);
-        const updatedValue = updatedConfig.get(existingKey);
-        assert.strictEqual(updatedValue, overwriteVal, 'Changes not applied');
+        it('Set new value', () => {
+            const success = config.set(newKey, newVal);
+            assert.strictEqual(success, true, 'Error while setting key/value');
+        });
+
+        it('Check new value', () => {
+            const val = config.get(newKey);
+            assert.strictEqual(val, newVal, 'Failed to set new value');
+        });
+
+        it('Overwrite existing value', () => {
+            const success = config.set(existingKey, overwriteVal);
+            assert.strictEqual(success, true, 'Error while overwriting an existing key/value');
+        });
+
+        it('Check overwritten value', () => {
+            const val = config.get(existingKey);
+            assert.strictEqual(val, overwriteVal, 'Failed to overwrite value');
+        });
+
+        it('Save changes to file', () => {
+            const success = config.save();
+            assert.strictEqual(success, true, 'Could not save changes to file');
+        });
+
+        it('Check serialization', () => {
+            const updatedConfig = new Config(fileName);
+            const updatedValue = updatedConfig.get(existingKey);
+            assert.strictEqual(updatedValue, overwriteVal, 'Changes not applied');
+        });
     });
 });
