@@ -35,32 +35,57 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
         return;
     }
 
-    if (info.Length() > 1 && !info[1].IsBoolean())
+    if (info.Length() > 1 && (!info[1].IsObject() && !info[1].IsBoolean()))
     {
         Napi::TypeError::New(env, "Wrong arguments").ThrowAsJavaScriptException();
         return;
     }
 
-    auto fileName = info[0].As<Napi::String>().Utf8Value();
+    const std::string fileName = info[0].As<Napi::String>().Utf8Value();
+    std::ifstream file(fileName.c_str());
+    bool exists = file.good();
 
+    this->_name = fileName;
+
+    alt::config::Node node;
     bool createFileIfNotExist = false;
 
     if (info.Length() > 1 && info[1].IsBoolean())
         createFileIfNotExist = info[1].As<Napi::Boolean>().Value();
+    else if (info.Length() > 1 && info[1].IsObject())
+        createFileIfNotExist = true;
 
-    this->_name = fileName;
-
-    auto node = helper::Load(fileName);
-
-    if (node == false && createFileIfNotExist != true)
+    if (exists)
+    {
+        node = helper::Load(file);
+    }
+    else if (!exists && !createFileIfNotExist)
     {
         Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
         return;
     }
-    else if (node == false)
+    else if (!exists && createFileIfNotExist)
     {
-        // create clean node instance
-        node = alt::config::Node();
+        if (info[1].IsObject())
+        {
+#ifdef DEBUG
+            std::cout << "Config::Config config file does not exist, using predefined values" << std::endl;
+#endif
+            node = alt::config::Node(helper::NapiObjectToDict(info[1].As<Napi::Object>()));
+        }
+        else
+        {
+#ifdef DEBUG
+            std::cout << "Config::Config config file does not exist, creating empty config" << std::endl;
+#endif
+            node = alt::config::Node(helper::NapiObjectToDict(Napi::Object::New(env)));
+        }
+    }
+    else
+    {
+#ifdef DEBUG
+        std::cout << "Config::Config config file exists, continuing without action" << std::endl;
+#endif
     }
 
     this->_node = node;

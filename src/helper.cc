@@ -5,10 +5,7 @@ namespace helper
     alt::config::Node Load(const std::string &fileName)
     {
         std::ifstream ifile(fileName);
-        if (!ifile.good())
-        {
-            return false;
-        }
+
         alt::config::Parser parser(ifile);
         try
         {
@@ -19,8 +16,25 @@ namespace helper
         catch (const alt::config::Error &e)
         {
             std::cout << e.what() << std::endl;
+            return alt::config::Node();
         }
-        return false;
+    }
+
+    alt::config::Node Load(std::ifstream &ifile)
+    {
+
+        alt::config::Parser parser(ifile);
+        try
+        {
+            auto node = parser.Parse();
+
+            return node;
+        }
+        catch (const alt::config::Error &e)
+        {
+            std::cout << e.what() << std::endl;
+            return alt::config::Node();
+        }
     }
 
     bool Save(const std::string &fileName, alt::config::Node node)
