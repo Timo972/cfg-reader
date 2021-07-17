@@ -2,24 +2,6 @@
 
 namespace helper
 {
-    alt::config::Node Load(const std::string &fileName)
-    {
-        std::ifstream ifile(fileName);
-
-        alt::config::Parser parser(ifile);
-        try
-        {
-            auto node = parser.Parse();
-
-            return node;
-        }
-        catch (const alt::config::Error &e)
-        {
-            std::cout << e.what() << std::endl;
-            return alt::config::Node();
-        }
-    }
-
     alt::config::Node Load(std::ifstream &ifile)
     {
 
