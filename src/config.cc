@@ -59,12 +59,12 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
     {
         node = helper::Load(file);
     }
-    else if (!exists && !createFileIfNotExist)
+    else if (!createFileIfNotExist)
     {
         Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
         return;
     }
-    else if (!exists && createFileIfNotExist)
+    else if (createFileIfNotExist)
     {
         if (info[1].IsObject())
         {
@@ -246,7 +246,7 @@ Napi::Value Config::Get(const Napi::CallbackInfo &info)
     {
         value = this->_node[key];
     }
-    catch (alt::config::Error e)
+    catch (...)
     {
         return env.Null();
     }
