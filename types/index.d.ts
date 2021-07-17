@@ -53,6 +53,11 @@ declare module "cfg-reader" {
          * @returns {ConfigValue}
          */
         public getOfType(key: string, type: ValueType | number): ConfigValue;
+        /**
+         * Serialize config 
+         * @returns {string}
+         */
+        public serialize(): string;
     }
 
 }
