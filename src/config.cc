@@ -50,12 +50,17 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
 
     this->_name = fileName;
 
-    auto node = altWrapper::Load(fileName);
+    auto node = helper::Load(fileName);
 
     if (node == false && createFileIfNotExist != true)
     {
         Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
         return;
+    }
+    else if (node == false)
+    {
+        // create clean node instance
+        node = alt::config::Node();
     }
 
     this->_node = node;
@@ -183,65 +188,11 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
     return env.Null();
 }
 
-alt::config::Node Config::SerializeValue(Napi::Value value)
-{
-    if (value.IsNumber())
-    {
-        double serialized = value.As<Napi::Number>().DoubleValue();
-        return serialized;
-    }
-    else if (value.IsBoolean())
-    {
-        bool serialized = value.As<Napi::Boolean>().Value();
-        return serialized;
-    }
-    else if (value.IsString())
-    {
-        std::string serialized = value.As<Napi::String>().Utf8Value();
-        return serialized;
-    }
-    else if (value.IsArray())
-    {
-        Napi::Array array = value.As<Napi::Array>();
-        alt::config::Node::List list;
-
-        for (uint32_t i = 0; i < array.Length(); i++)
-        {
-            Napi::Value arrValue = array.Get(i);
-            auto serializedValue = SerializeValue(arrValue);
-
-            list.push_back(serializedValue);
-        }
-
-        return list;
-    }
-    else if (value.IsObject())
-    {
-        Napi::Object object = value.As<Napi::Object>();
-        Napi::Array propNames = object.GetPropertyNames();
-        alt::config::Node::Dict dict;
-
-        for (uint32_t i = 0; i < propNames.Length(); i++)
-        {
-            Napi::Value propKey = propNames.Get(i);
-            Napi::Value propValue = object.Get(propKey);
-            auto serializedKey = propKey.As<Napi::String>().Utf8Value();
-            auto serializedValue = SerializeValue(propValue);
-
-            dict.insert(std::make_pair(serializedKey, serializedValue));
-        }
-
-        return dict;
-    }
-
-    throw alt::config::Error{"Invalid value passed"};
-}
-
 Napi::Value Config::Serialize(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
 
-    std::string content = altWrapper::Serialize(this->_node);
+    std::string content = helper::Serialize(this->_node);
 
     return Napi::String::New(env, content);
 }
@@ -325,14 +276,25 @@ Napi::Value Config::Set(const Napi::CallbackInfo &info)
 
     try
     {
-        auto value = SerializeValue(info[1]);
+        auto value = helper::SerializeValue(info[1]);
+
+#ifdef DEBUG
+        std::cout << "Config::Set serialized value: " << value << std::endl;
+#endif
 
         this->_node[key] = value;
 
+#ifdef DEBUG
+        std::cout << "Config::Set setted value to alt::config::Node key: " << key << std::endl;
+#endif
+
         return Napi::Boolean::New(env, true);
     }
-    catch (...)
+    catch (const std::exception &e)
     {
+#ifdef DEBUG
+        std::cout << "Config::Set ERROR: " << e.what() << std::endl;
+#endif
         const std::string errorMsg = std::string("Unsupported value at key: " + key);
         Napi::Error::New(env, errorMsg).ThrowAsJavaScriptException();
         return Napi::Boolean::New(env, false);
@@ -385,7 +347,7 @@ Napi::Value Config::Save(const Napi::CallbackInfo &info)
 
     try
     {
-        altWrapper::Save(this->_name, this->_node);
+        helper::Save(this->_name, this->_node);
     }
     catch (...)
     {
