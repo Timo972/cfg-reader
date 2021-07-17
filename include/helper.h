@@ -5,7 +5,6 @@
 #include <napi.h>
 namespace helper
 {
-    alt::config::Node Load(const std::string &fileName);
     alt::config::Node Load(std::ifstream &ifile);
 
     bool Save(const std::string &fileName, alt::config::Node node);
