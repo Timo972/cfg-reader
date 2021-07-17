@@ -64,7 +64,7 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
         Napi::TypeError::New(env, "File does not exist").ThrowAsJavaScriptException();
         return;
     }
-    else if (createFileIfNotExist)
+    else
     {
         if (info[1].IsObject())
         {
@@ -80,12 +80,6 @@ Config::Config(const Napi::CallbackInfo &info) : Napi::ObjectWrap<Config>(info)
 #endif
             node = alt::config::Node(helper::NapiObjectToDict(Napi::Object::New(env)));
         }
-    }
-    else
-    {
-#ifdef DEBUG
-        std::cout << "Config::Config config file exists, continuing without action" << std::endl;
-#endif
     }
 
     this->_node = node;
