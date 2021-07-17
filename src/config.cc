@@ -183,6 +183,60 @@ Napi::Value Config::GetValueUnknownType(Napi::Env env, alt::config::Node value)
     return env.Null();
 }
 
+alt::config::Node Config::SerializeValue(Napi::Value value)
+{
+    if (value.IsNumber())
+    {
+        double serialized = value.As<Napi::Number>().DoubleValue();
+        return serialized;
+    }
+    else if (value.IsBoolean())
+    {
+        bool serialized = value.As<Napi::Boolean>().Value();
+        return serialized;
+    }
+    else if (value.IsString())
+    {
+        std::string serialized = value.As<Napi::String>().Utf8Value();
+        return serialized;
+    }
+    else if (value.IsArray())
+    {
+        Napi::Array array = value.As<Napi::Array>();
+        alt::config::Node::List list;
+
+        for (uint32_t i = 0; i < array.Length(); i++)
+        {
+            Napi::Value arrValue = array.Get(i);
+            auto serializedValue = SerializeValue(arrValue);
+
+            list.push_back(serializedValue);
+        }
+
+        return list;
+    }
+    else if (value.IsObject())
+    {
+        Napi::Object object = value.As<Napi::Object>();
+        Napi::Array propNames = object.GetPropertyNames();
+        alt::config::Node::Dict dict;
+
+        for (uint32_t i = 0; i < propNames.Length(); i++)
+        {
+            Napi::Value propKey = propNames.Get(i);
+            Napi::Value propValue = object.Get(propKey);
+            auto serializedKey = propKey.As<Napi::String>().Utf8Value();
+            auto serializedValue = SerializeValue(propValue);
+
+            dict.insert(std::make_pair(serializedKey, serializedValue));
+        }
+
+        return dict;
+    }
+
+    throw alt::config::Error{ "Invalid value passed" };
+}
+
 Napi::Value Config::Get(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
@@ -252,7 +306,7 @@ Napi::Value Config::Set(const Napi::CallbackInfo &info)
         return Napi::Boolean::New(env, false);
     }
 
-    if (!info[1].IsNumber() && !info[1].IsBoolean() && !info[1].IsString())
+    if (!info[1].IsNumber() && !info[1].IsBoolean() && !info[1].IsString() && !info[1].IsArray() && !info[1].IsObject())
     {
         Napi::TypeError::New(env, "Unsupported value type").ThrowAsJavaScriptException();
         return Napi::Boolean::New(env, false);
@@ -260,27 +314,20 @@ Napi::Value Config::Set(const Napi::CallbackInfo &info)
 
     std::string key = info[0].As<Napi::String>().Utf8Value();
 
-    if (info[1].IsNumber())
+    try
     {
-        double value = info[1].As<Napi::Number>().DoubleValue();
+        auto value = SerializeValue(info[1]);
+
         this->_node[key] = value;
+
+        return Napi::Boolean::New(env, true);
     }
-    else if (info[1].IsBoolean())
+    catch (...)
     {
-        bool value = info[1].As<Napi::Boolean>().Value();
-        this->_node[key] = value;
-    }
-    else if (info[1].IsString())
-    {
-        std::string value = info[1].As<Napi::String>().Utf8Value();
-        this->_node[key] = value;
-    }
-    else
-    {
+        const std::string errorMsg = std::string("Unsupported value at key: " + key);
+        Napi::Error::New(env, errorMsg).ThrowAsJavaScriptException();
         return Napi::Boolean::New(env, false);
     }
-
-    return Napi::Boolean::New(env, true);
 };
 
 Napi::Value Config::GetOfType(const Napi::CallbackInfo &info)
