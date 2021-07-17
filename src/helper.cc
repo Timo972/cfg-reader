@@ -23,9 +23,19 @@ namespace altWrapper
         return false;
     }
 
-    bool Save(const std::string &fileName, alt::config::Node node) {
+    bool Save(const std::string &fileName, alt::config::Node node)
+    {
         std::ofstream ofile(fileName);
         alt::config::Emitter().Emit(node, ofile);
         return true;
+    }
+
+    std::string Serialize(alt::config::Node node)
+    {
+        std::stringstream out;
+
+        alt::config::Emitter().Emit(node, out);
+
+        return out.str();
     }
 }

@@ -6,7 +6,7 @@
 
 Napi::Object Config::Init(Napi::Env env, Napi::Object exports)
 {
-    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("get"), InstanceMethod<&Config::GetOfType>("getOfType"), InstanceMethod<&Config::Set>("set"), InstanceMethod<&Config::Save>("save")});
+    Napi::Function func = DefineClass(env, "Config", {InstanceMethod<&Config::Get>("get"), InstanceMethod<&Config::GetOfType>("getOfType"), InstanceMethod<&Config::Set>("set"), InstanceMethod<&Config::Save>("save"), InstanceMethod<&Config::Serialize>("serialize")});
 
     Napi::FunctionReference *constructor = new Napi::FunctionReference();
 
@@ -234,7 +234,16 @@ alt::config::Node Config::SerializeValue(Napi::Value value)
         return dict;
     }
 
-    throw alt::config::Error{ "Invalid value passed" };
+    throw alt::config::Error{"Invalid value passed"};
+}
+
+Napi::Value Config::Serialize(const Napi::CallbackInfo &info)
+{
+    Napi::Env env = info.Env();
+
+    std::string content = altWrapper::Serialize(this->_node);
+
+    return Napi::String::New(env, content);
 }
 
 Napi::Value Config::Get(const Napi::CallbackInfo &info)
