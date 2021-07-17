@@ -15,17 +15,6 @@ declare module "cfg-reader" {
     }
 
     /**
-     * Equal to the ValueType enum, just for JS
-     */
-    export const Type = {
-        Boolean: 0,
-        Number: 1,
-        String: 2,
-        List: 3,
-        Dict: 4
-    }
-
-    /**
      * 
      */
     export class Config {
