@@ -5,6 +5,12 @@ import fs from "fs";
 const existingKey = "test";
 const existingValue = "testval";
 
+const intKey = "myInt";
+const intValue = 7;
+
+const boolKey = "myBool";
+const boolValue = true;
+
 const existingDictKey = "myDict";
 const existingDictValue = "test: 3";
 
@@ -39,7 +45,7 @@ before(() => {
 
   fs.writeFileSync(
     fileName,
-    `${existingEmptyListKey}:${existingEmptyListValue}\n${existingKey}:'${existingValue}'\n${existingDictKey}: {\n${existingDictValue}\n}\n${existingListKey}:${existingListValue}\n${existingInlineListKey}:${existingInlineListValue}\n${existingEmptyDictKey}:${existingEmptyDictValue}\n${existingInlineDictKey}:${existingInlineDictValue}`,
+    `${existingEmptyListKey}:${existingEmptyListValue}\n${existingKey}:'${existingValue}'\n${existingDictKey}: {\n${existingDictValue}\n}\n${existingListKey}:${existingListValue}\n${existingInlineListKey}:${existingInlineListValue}\n${existingEmptyDictKey}:${existingEmptyDictValue}\n${existingInlineDictKey}:${existingInlineDictValue}\n${intKey}:${intValue}\n${boolKey}:${boolValue}`,
     {
       encoding: "utf8",
     }
@@ -193,13 +199,23 @@ describe("Existing config", () => {
       config = new Config(fileName);
     });
 
-    it("Get existing value", () => {
+    it("Get string", () => {
       const val = config.get(existingKey);
       assert.strictEqual(
         val,
         existingValue,
         `Wrong value returned:\nexpected type: ${typeof existingValue}\ngot type: ${typeof val}\nexpected value: ${existingValue}\ngot value: ${val}`
       );
+    });
+
+    it("Get boolean", () => {
+      const val = config.get(boolKey);
+      assert.strictEqual(val, boolValue);
+    });
+
+    it("Get integer", () => {
+      const val = config.get(intKey);
+      assert.strictEqual(val, intValue);
     });
 
     it("Set new value", () => {
@@ -235,6 +251,15 @@ describe("Existing config", () => {
       const updatedConfig = new Config(fileName);
       const updatedValue = updatedConfig.get(existingKey);
       assert.strictEqual(updatedValue, overwriteVal, "Changes not applied");
+    });
+  });
+
+  describe("Utility", () => {
+    it("Config::Serialize", () => {
+      const config = new Config(fileName);
+      const content = fs.readFileSync(fileName, { encoding: "utf8" });
+
+      const serialized = config.serialize();
     });
   });
 });
