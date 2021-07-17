@@ -39,6 +39,7 @@ const newVal = "imNew";
 const overwriteVal = "overwrittenVal";
 
 const fileName = "test.cfg";
+const newConfigPath = "new.cfg";
 
 before(() => {
   if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
@@ -54,6 +55,7 @@ before(() => {
 
 after(() => {
   if (fs.existsSync(fileName)) fs.unlinkSync(fileName);
+  if (fs.existsSync(newConfigPath)) fs.unlinkSync(newConfigPath);
 });
 
 describe("Existing config", () => {
@@ -260,6 +262,45 @@ describe("Existing config", () => {
       const content = fs.readFileSync(fileName, { encoding: "utf8" });
 
       const serialized = config.serialize();
+    });
+  });
+});
+
+describe('New config', () => {
+  describe('Set manual', () => {
+    let config;
+    it("Create config", () => {
+      if (fs.existsSync(newConfigPath)) fs.unlinkSync(newConfigPath);
+      config = new Config(newConfigPath, true);
+      assert.strictEqual("get" in config, true, "Invalid config instance");
+    });
+    it("Set value", () => {
+      config.set("test", 0);
+    });
+    it("Save config", () => {
+      config.save();
+    });
+    it("Re-open config", () => {
+      config = new Config(newConfigPath);
+    });
+    it("Check", () => {
+      const val = config.get("test");
+      assert.strictEqual(val, true, "Changes not applied");
+    });
+  });
+
+  describe('Predefined values', () => {
+    let config;
+    it("Create config", () => {
+      if (fs.existsSync(newConfigPath)) fs.unlinkSync(newConfigPath);
+      config = new Config(newConfigPath, { test: true });
+    });
+    it("Re-open config", () => {
+      config = new Config(newConfigPath);
+    });
+    it("Check", () => {
+      const val = config.get("test");
+      assert.strictEqual(val, true, "Changes not appliedd");
     });
   });
 });

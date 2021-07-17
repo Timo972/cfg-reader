@@ -29,7 +29,8 @@ declare module "cfg-reader" {
      * 
      */
     export class Config {
-        constructor(fileName: string);
+        constructor(fileName: string, createIfNotExist: boolean);
+        constructor(fileName: string, predefinedValues: Object);
         /**
          * Get a config value with unknown type, slower than GetOfType
          * @param key {string}
