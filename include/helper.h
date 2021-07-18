@@ -7,9 +7,9 @@ namespace helper
 {
     alt::config::Node Load(std::ifstream &ifile);
 
-    bool Save(const std::string &fileName, alt::config::Node node);
+    bool Save(const std::string &fileName, alt::config::Node node, bool useCommas = true);
 
-    std::string Serialize(alt::config::Node node);
+    std::string Serialize(alt::config::Node node, bool useCommas = true);
 
     alt::config::Node SerializeValue(Napi::Value value);
 

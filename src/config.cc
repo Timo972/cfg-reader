@@ -211,7 +211,14 @@ Napi::Value Config::Serialize(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
 
-    std::string content = helper::Serialize(this->_node);
+    bool useCommas = false;
+
+    if (info.Length() > 0 && info[0].IsBoolean())
+    {
+        useCommas = info[0].ToBoolean().Value();
+    }
+
+    std::string content = helper::Serialize(this->_node, useCommas);
 
     return Napi::String::New(env, content);
 }
@@ -364,9 +371,16 @@ Napi::Value Config::Save(const Napi::CallbackInfo &info)
 {
     Napi::Env env = info.Env();
 
+    bool useCommas = false;
+
+    if (info.Length() > 0 && info[0].IsBoolean())
+    {
+        useCommas = info[0].ToBoolean().Value();
+    }
+
     try
     {
-        helper::Save(this->_name, this->_node);
+        helper::Save(this->_name, this->_node, useCommas);
     }
     catch (...)
     {

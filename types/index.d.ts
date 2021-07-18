@@ -35,7 +35,7 @@ declare module "cfg-reader" {
         /**
          * Save the current changes to the opened file
          */
-        public save(): boolean;
+        public save(useCommas: boolean = false): boolean;
         /**
          * Get a config value with known type, faster than normal Get
          * @param key {string}
@@ -47,7 +47,7 @@ declare module "cfg-reader" {
          * Serialize config 
          * @returns {string}
          */
-        public serialize(): string;
+        public serialize(useCommas: boolean = false): string;
     }
 
 }

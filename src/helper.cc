@@ -19,18 +19,18 @@ namespace helper
         }
     }
 
-    bool Save(const std::string &fileName, alt::config::Node node)
+    bool Save(const std::string &fileName, alt::config::Node node, bool useCommas)
     {
         std::ofstream ofile(fileName);
-        alt::config::Emitter().Emit(node, ofile);
+        alt::config::Emitter().Emit(node, ofile, 0, true, useCommas);
         return true;
     }
 
-    std::string Serialize(alt::config::Node node)
+    std::string Serialize(alt::config::Node node, bool useCommas)
     {
         std::stringstream out;
 
-        alt::config::Emitter().Emit(node, out);
+        alt::config::Emitter().Emit(node, out, 0, true, useCommas);
 
         return out.str();
     }
