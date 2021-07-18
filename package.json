@@ -19,7 +19,7 @@
     "configure-alt": "node-gyp configure --nodedir G:/Dev/altV/alt-node",
     "configure": "node-gyp configure",
     "clean": "node-gyp clean",
-    "test": "npm run test:esm && npm run test:cjs",
+    "test": "npm run test:esm",
     "test:esm": "mocha ./test/all.test.mjs",
     "test:cjs": "mocha ./test/index.test.cjs"
   },

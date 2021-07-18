@@ -212,13 +212,19 @@ Napi::Value Config::Serialize(const Napi::CallbackInfo &info)
     Napi::Env env = info.Env();
 
     bool useCommas = false;
+    bool useApostrophe = false;
 
     if (info.Length() > 0 && info[0].IsBoolean())
     {
         useCommas = info[0].ToBoolean().Value();
     }
 
-    std::string content = helper::Serialize(this->_node, useCommas);
+    if (info.Length() > 1 && info[1].IsBoolean())
+    {
+        useApostrophe = info[1].ToBoolean().Value();
+    }
+
+    std::string content = helper::Serialize(this->_node, useCommas, useApostrophe);
 
     return Napi::String::New(env, content);
 }
@@ -372,15 +378,21 @@ Napi::Value Config::Save(const Napi::CallbackInfo &info)
     Napi::Env env = info.Env();
 
     bool useCommas = false;
+    bool useApostrophe = false;
 
     if (info.Length() > 0 && info[0].IsBoolean())
     {
         useCommas = info[0].ToBoolean().Value();
     }
 
+    if (info.Length() > 1 && info[1].IsBoolean())
+    {
+        useApostrophe = info[1].ToBoolean().Value();
+    }
+
     try
     {
-        helper::Save(this->_name, this->_node, useCommas);
+        helper::Save(this->_name, this->_node, useCommas, useApostrophe);
     }
     catch (...)
     {
