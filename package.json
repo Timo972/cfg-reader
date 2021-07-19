@@ -1,6 +1,6 @@
 {
   "name": "cfg-reader",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "A .cfg file reader",
   "scripts": {
     "build": "rollup -c",
