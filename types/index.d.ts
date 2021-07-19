@@ -20,21 +20,31 @@ declare module "cfg-reader" {
     export class Config {
         /**
          * 
-         * @param fileName {string}
-         * @param createIfNotExist {boolean}
+         * @param {string} fileName 
          */
-        constructor(fileName: string, createIfNotExist?: boolean);
+        constructor(fileName: string);
+        /**
+         * 
+         * @param {string} fileName 
+         * @param {boolean} createIfNotExist [default: false]
+         */
+        constructor(fileName: string, createIfNotExist: boolean);
+        /**
+         * 
+         * @param {string} fileName 
+         * @param {Object} predefinedValues 
+         */
         constructor(fileName: string, predefinedValues: Object);
         /**
          * Get a config value with unknown type, slower than GetOfType
-         * @param key {string}
+         * @param {string} key 
          * @returns {ConfigValue}
          */
         public get(key: string): ConfigValue;
         /**
          * Set a config value
-         * @param key {string}
-         * @param value {any}
+         * @param {string} key 
+         * @param {any} value 
          */
         public set(key: string, value: ConfigValue): void;
         /**
@@ -47,8 +57,8 @@ declare module "cfg-reader" {
         public save(useCommas?: boolean, useApostrophe?: boolean): boolean;
         /**
          * Get a config value with known type, faster than normal Get
-         * @param key {string}
-         * @param type {ValueType}
+         * @param {string} key 
+         * @param {ValueType} type 
          * @returns {ConfigValue}
          */
         public getOfType(key: string, type: ValueType | number): ConfigValue;
