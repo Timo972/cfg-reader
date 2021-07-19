@@ -39,8 +39,12 @@ declare module "cfg-reader" {
         public set(key: string, value: ConfigValue): void;
         /**
          * Save the current changes to the opened file
+         * @param {boolean} useCommas [default: false]
+         * @param {boolean} useApostrophe [default: false]
+         * 
+         * @returns boolean
          */
-        public save(useCommas: boolean = false, useApostrophe: boolean = false): boolean;
+        public save(useCommas?: boolean, useApostrophe?: boolean): boolean;
         /**
          * Get a config value with known type, faster than normal Get
          * @param key {string}
@@ -50,9 +54,11 @@ declare module "cfg-reader" {
         public getOfType(key: string, type: ValueType | number): ConfigValue;
         /**
          * Serialize config 
+         * @param {boolean} useCommas [default: false]
+         * @param {boolean} useApostrophe [default: false]
          * @returns {string}
          */
-        public serialize(useCommas: boolean = false, useApostrophe: boolean = false): string;
+        public serialize(useCommas?: boolean, useApostrophe?: boolean): string;
     }
 
 }
