@@ -50,7 +50,7 @@ declare module "cfg-reader" {
         /**
          * Save the current changes to the opened file
          * @param {boolean} useCommas [default: false]
-         * @param {boolean} useApostrophe [default: true]
+         * @param {boolean} useApostrophe [default: false]
          * 
          * @returns boolean
          */
@@ -65,7 +65,7 @@ declare module "cfg-reader" {
         /**
          * Serialize config 
          * @param {boolean} useCommas [default: false]
-         * @param {boolean} useApostrophe [default: true]
+         * @param {boolean} useApostrophe [default: false]
          * @returns {string}
          */
         public serialize(useCommas?: boolean, useApostrophe?: boolean): string;

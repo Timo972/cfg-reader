@@ -212,7 +212,7 @@ Napi::Value Config::Serialize(const Napi::CallbackInfo &info)
     Napi::Env env = info.Env();
 
     bool useCommas = false;
-    bool useApostrophe = true;
+    bool useApostrophe = false;
 
     if (info.Length() > 0 && info[0].IsBoolean())
     {
@@ -378,7 +378,7 @@ Napi::Value Config::Save(const Napi::CallbackInfo &info)
     Napi::Env env = info.Env();
 
     bool useCommas = false;
-    bool useApostrophe = true;
+    bool useApostrophe = false;
 
     if (info.Length() > 0 && info[0].IsBoolean())
     {
