@@ -25,7 +25,7 @@
   "homepage": "https://github.com/Timo972/cfg-reader#readme",
   "devDependencies": {
     "@types/mocha": "^8.2.1",
-    "@types/node": "^13.13.46",
+    "@types/node": "^13.13.52",
     "@typescript-eslint/eslint-plugin": "^4.17.0",
     "@typescript-eslint/parser": "^4.17.0",
     "eslint": "^7.21.0",
