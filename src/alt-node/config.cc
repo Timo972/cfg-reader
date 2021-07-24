@@ -82,7 +82,6 @@ Config::~Config()
 void Config::New(const v8::FunctionCallbackInfo<v8::Value> &args)
 {
     v8::Isolate *isolate = args.GetIsolate();
-    v8::Local<v8::Context> context = isolate->GetCurrentContext();
 
     if (args.IsConstructCall())
     {
@@ -311,7 +310,7 @@ void Config::Get(const v8::FunctionCallbackInfo<v8::Value> &info)
     {
         value = cfg->_node[key];
     }
-    catch (alt::config::Error e)
+    catch (alt::config::Error &e)
     {
         info.GetReturnValue().Set(v8::Null(isolate));
         return;
