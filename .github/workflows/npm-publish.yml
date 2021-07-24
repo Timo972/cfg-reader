@@ -192,9 +192,6 @@ jobs:
         shell: bash
         run: echo "`jq '.version="${{ steps.version.outputs.TAG }}"' package.json`" > package.json
 
-      - name: Debug tree
-        run: tree
-
       - run: npm publish --tag next
         if: contains(steps.version.outputs.TAG, 'rc')
         name: Publish
