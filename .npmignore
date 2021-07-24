@@ -13,3 +13,4 @@ server.log
 update.json
 .vscode
 .github
+deps/alt-node
