@@ -3,10 +3,10 @@
         {
             "cflags": ["-fexceptions"],
             "cflags_cc": ["-fexceptions"],
-            "target_name": "config",
-            "sources": ["src/main.cc", "src/config.cc", "src/helper.cc"],
-            "include_dirs": ["<!(node -p \"require('node-addon-api').include_dir\")", "deps/alt-config", "include"],
-            'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
+            "target_name": "config_alt",
+            "sources": ["src/alt-node/main.cc", "src/alt-node/config.cc", "src/alt-node/helper.cc", "src/alt-node/alt-node.cc"],
+            "include_dirs": ["deps/alt-config", "include/alt-node"],
+            'defines': [],
             "conditions": [
                 ['OS=="mac"', {
                     "xcode_settings": {

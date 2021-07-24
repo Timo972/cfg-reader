@@ -4,28 +4,21 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/aec7d7510bb34f138b70c304818945e4)](https://www.codacy.com/gh/Timo972/cfg-reader/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Timo972/cfg-reader&utm_campaign=Badge_Grade)
+[![Latest Build](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml)
 
 ## License and copyright notice
 
 [alt-config (MIT)](https://github.com/altmp/alt-config)
 
 ## Important
-Keep in mind this module is a native addon and its important to install to correct version for it to work.  
-- @next for node version >= 12
-- @alt for alt:V node module  
-  You can find the special implementation for the alt:V node module at the alt-node branch.  
-+ If you want to use this module along the alt:V JS Module, follow the corresponding installation tutorial
+Keep in mind this module is a native addon and its important to reinstall if you change your node version.  
+- supported node version >= 12
+- Since v2.1.0 you can use this module for the alt:V nodejs version and default nodejs version at the same time.
 ---
-## Installation
+## Installation (works for alt:V too)
 
 ```bash
 npm i --save cfg-reader@next
-```
-
-## Installation for alt:V
-
-```bash
-npm i --save cfg-reader@alt
 ```
 ---
 ## Differences between v1

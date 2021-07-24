@@ -9,9 +9,93 @@ on:
       - '*.*.*'
 
 jobs:
-  build:
-    name: Build & Test
-    runs-on: windows-latest
+  build-alt-win32:
+    name: Build alt-node Win32
+    runs-on: windows-2019
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+        with:
+          submodules: true
+          lfs: true
+
+      - uses: actions/setup-node@v1
+        name: Setup Node.js 14.x
+        with:
+          node-version: 14.x
+
+      - uses: actions/cache@v2
+        id: cache
+        env:
+            cache-name: cache-node-modules
+        with:
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+            path: |
+                ~/.npm
+                node_modules
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Build
+        run: npm run build-alt
+
+      - name: Upload built script
+        uses: actions/upload-artifact@v2
+        with:
+            name: alt-compiled-win32
+            path: compiled
+            if-no-files-found: error
+
+  build-alt-unix:
+    name: Build alt-node Unix
+    runs-on: ubuntu-20.04
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+        with:
+          submodules: true
+          lfs: true
+
+      - uses: actions/setup-node@v1
+        name: Setup Node.js 14.x
+        with:
+          node-version: 14.x
+
+      - uses: actions/cache@v2
+        id: cache
+        env:
+            cache-name: cache-node-modules
+        with:
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+            path: |
+                ~/.npm
+                node_modules
+            restore-keys: |
+                ${{ runner.os }}-build-${{ env.cache-name }}-
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Build
+        run: npm run build-alt
+
+      - name: Upload built script
+        uses: actions/upload-artifact@v2
+        with:
+            name: alt-compiled-unix
+            path: compiled
+            if-no-files-found: error
+
+  test:
+    name: Build & Test (NAPI)
+    runs-on: windows-2019
     strategy:
       matrix:
         node-version: [12.x, 14.x, 15.x]
@@ -50,9 +134,9 @@ jobs:
         name: Test
 
   publish-npm:
-    needs: build
-    runs-on: windows-latest
-    name: Build & Publish
+    needs: [test, build-alt-win32, build-alt-unix]
+    runs-on: windows-2019
+    name: Build (NAPI) & Publish (ALL) Node Package Registry
     steps:
       - uses: actions/checkout@v2
         name: Checkout
@@ -85,6 +169,18 @@ jobs:
       - run: npm run build
         name: Build
 
+      - name: Download alt-compiled-win32
+        uses: actions/download-artifact@v2
+        with:
+            name: alt-compiled-win32
+            path: compiled
+
+      - name: Download alt-compiled-unix
+        uses: actions/download-artifact@v2
+        with:
+            name: alt-compiled-unix
+            path: compiled
+
       - name: Extract version
         id: version
         shell: bash
@@ -109,7 +205,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
   publish-gpr:
-    needs: build
+    name: Publish Github Package Registry
+    needs: test
     runs-on: windows-latest
     if: "!true"
     steps:

@@ -1,6 +1,9 @@
+
 import GetBinding from 'bindings';
 
-const bindings = GetBinding("config");
+const altNode = process.execArgv.includes('altv-resource');
+
+const bindings = !altNode ? GetBinding("config") : GetBinding("config_alt");
 
 export const Config = bindings.Config;
 export const Type = bindings.Type;
