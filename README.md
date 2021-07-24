@@ -4,6 +4,7 @@
 [![NPM Downloads][downloads-image]][downloads-url]
 [![Node.js Version][node-version-image]][node-version-url]
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/aec7d7510bb34f138b70c304818945e4)](https://www.codacy.com/gh/Timo972/cfg-reader/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Timo972/cfg-reader&utm_campaign=Badge_Grade)
+[![Latest Build](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml)
 
 ## License and copyright notice
 

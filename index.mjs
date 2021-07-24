@@ -1,7 +1,7 @@
 
 import GetBinding from 'bindings';
 
-const altNode = process.moduleLoadList.includes('NativeModule alt');
+const altNode = process.execArgv.includes('altv-resource');
 
 const bindings = !altNode ? GetBinding("config") : GetBinding("config_alt");
 
