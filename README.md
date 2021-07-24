@@ -11,22 +11,14 @@
 [alt-config (MIT)](https://github.com/altmp/alt-config)
 
 ## Important
-Keep in mind this module is a native addon and its important to install to correct version for it to work.  
-- @next for node version >= 12
-- @alt for alt:V node module  
-  You can find the special implementation for the alt:V node module at the alt-node branch.  
-+ If you want to use this module along the alt:V JS Module, follow the corresponding installation tutorial
+Keep in mind this module is a native addon and its important to reinstall if you change your node version.  
+- supported node version >= 12
+- Since v2.1.0 you can use this module for the alt:V nodejs version and default nodejs version at the same time.
 ---
-## Installation
+## Installation (works for alt:V too)
 
 ```bash
 npm i --save cfg-reader@next
-```
-
-## Installation for alt:V
-
-```bash
-npm i --save cfg-reader@alt
 ```
 ---
 ## Differences between v1
