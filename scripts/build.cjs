@@ -2,53 +2,82 @@ const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
 
-const TARGET_NAME = "config_alt.node";
-const NODE_VERSION = "14.15.2";
+const TARGET_NAME = (alt) => `config${alt ? "_alt" : ""}.node`;
+const ALT_NODE_VERSION = "14.15.2";
 
 if (process.platform !== "linux" && process.platform !== "win32")
   throw new Error(
     `This platform (${process.platform}) does not support alt-node`
   );
 
-const buildPath = path.join(__dirname, "..", "build", "Release", TARGET_NAME);
+const buildPath = (alt) =>
+  path.join(__dirname, "..", "build", "Release", TARGET_NAME(alt));
 const nodePath =
   process.platform === "linux"
     ? "./deps/alt-node"
     : path.join(__dirname, "..", "deps", "alt-node");
+const rootPath = path.join(__dirname, "..");
+const getBindingFile = (alt) =>
+  path.join(__dirname, `binding-${alt ? "alt" : "napi"}.gyp`);
 
-const proc = spawn(
-  `npx node-gyp rebuild --nodedir ${path.normalize(nodePath)}`,
-  {
-    cwd: process.cwd(),
-    shell: true,
-  }
-);
+function copyBinding(alt = false) {
+  fs.copyFileSync(getBindingFile(alt), path.join(rootPath, "binding.gyp"));
+}
 
-proc.on("error", console.error);
+function deleteBinding() {
+  fs.unlinkSync(path.join(rootPath, "binding.gyp"));
+}
 
-proc.stdout.pipe(process.stdout);
-proc.stderr.pipe(process.stderr);
-process.stdin.pipe(proc.stdin);
+function build(alt = false) {
+  console.log(`Using ${alt ? "alt" : "napi"}-binding`);
 
-const outPath = path.join(
-  __dirname,
-  "..",
-  "compiled",
-  NODE_VERSION,
-  process.platform,
-  process.arch
-);
+  copyBinding(alt);
 
-proc.on("close", (code, signal) => {
-  if (code === 0) {
-    fs.mkdirSync(outPath, {
-      recursive: true,
-    });
-    fs.copyFileSync(buildPath, path.join(outPath, TARGET_NAME));
-    fs.rm(
-      buildPath,
-      { recursive: true, force: true },
-      (err) => err && console.error
-    );
-  }
-});
+  const proc = spawn(
+    alt
+      ? `npx node-gyp rebuild --nodedir ${path.normalize(nodePath)}`
+      : "npx node-gyp rebuild",
+    {
+      cwd: process.cwd(),
+      shell: true,
+    }
+  );
+
+  proc.on("error", console.error);
+
+  proc.stdout.pipe(process.stdout);
+  proc.stderr.pipe(process.stderr);
+  process.stdin.pipe(proc.stdin);
+
+  const outPath = alt
+    ? path.join(
+        __dirname,
+        "..",
+        "compiled",
+        ALT_NODE_VERSION,
+        process.platform,
+        process.arch
+      )
+    : path.join(__dirname, "..", "build", "Release");
+
+  proc.on("close", (code, signal) => {
+    if (code === 0) {
+      fs.mkdirSync(outPath, {
+        recursive: true,
+      });
+      if (alt) {
+        const bindingLoc = path.join(outPath, TARGET_NAME(alt));
+        console.log(`Locating bindings: ${bindingLoc}`);
+        fs.copyFileSync(buildPath(alt), bindingLoc);
+        fs.rm(
+          buildPath(alt),
+          { recursive: true, force: true },
+          (err) => err && console.error
+        );
+      }
+      deleteBinding();
+    }
+  });
+}
+
+build(process.argv.indexOf("--alt") > -1);
