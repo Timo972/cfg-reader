@@ -34,8 +34,8 @@
             "cflags": ["-fexceptions"],
             "cflags_cc": ["-fexceptions"],
             "target_name": "config_alt",
-            "sources": ["src/v8/main.cc", "src/v8/config.cc", "src/v8/helper.cc", "src/v8/alt-node.cc"],
-            "include_dirs": ["deps/alt-config", "include/v8"],
+            "sources": ["src/alt-node/main.cc", "src/alt-node/config.cc", "src/alt-node/helper.cc", "src/alt-node/alt-node.cc"],
+            "include_dirs": ["deps/alt-config", "include/alt-node"],
             'defines': [],
             "conditions": [
                 ['OS=="mac"', {
