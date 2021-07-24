@@ -15,8 +15,10 @@
   "scripts": {
     "postinstall": "echo \"should be built already\"",
     "build-alt": "node scripts/get-node.cjs && node scripts/build.cjs",
+    "build-napi": "node-gyp ",
     "build": "node-gyp rebuild",
     "configure-alt": "node-gyp configure --nodedir ./deps/alt-node",
+    "configure-napi": "node-gyp configure",
     "configure": "node-gyp configure",
     "clean": "node-gyp clean",
     "test": "npm run test:esm",
