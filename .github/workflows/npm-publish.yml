@@ -206,7 +206,7 @@ jobs:
 
   publish-gpr:
     name: Publish Github Package Registry
-    needs: build
+    needs: test
     runs-on: windows-latest
     if: "!true"
     steps:
