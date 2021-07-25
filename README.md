@@ -18,7 +18,7 @@ Keep in mind this module is a native addon and its important to reinstall if you
 ## Installation (works for alt:V too)
 
 ```bash
-npm i --save cfg-reader@next
+npm i --save cfg-reader
 ```
 ---
 ## Differences between v1
