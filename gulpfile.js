@@ -10,13 +10,13 @@ exports.buildAlt = series(getNode, build(true), clean);
 
 const testUnit = () => src("test/unit.test.mjs", { read: false }).pipe(
   mocha({
-    reporter: "nyan",
+    reporter: "list",
   })
 );
 
 const testPerformance = () => src("test/performance.test.mjs", { read: false }).pipe(
     mocha({
-      reporter: "nyan",
+      reporter: "list",
     })
 );
 
