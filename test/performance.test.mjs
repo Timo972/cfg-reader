@@ -21,7 +21,7 @@ describe("Performance tests", () => {
   it("Creating config", () => {
     const test = new PerfTest();
     cfg = new Config("perf.cfg", true);
-    assert.equal(test.stop() < 1, true, "Slow!");
+    assert.equal(test.stop() < 3, true, "Slow!");
   });
 
   it("Set string value", () => {
