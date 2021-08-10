@@ -48,6 +48,7 @@
   "devDependencies": {
     "@octokit/rest": "^18.7.1",
     "download": "^8.0.0",
+    "gulp": "^4.0.2",
     "mocha": "^8.3.0",
     "node-gyp": "^8.1.0",
     "node-stream-zip": "^1.13.6"

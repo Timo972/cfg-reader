@@ -71,4 +71,6 @@ async function main() {
   fs.unlinkSync(zipFile);
 }
 
-main();
+exports.getNode = function getNode (cb) {
+  main().then(cb)
+}

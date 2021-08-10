@@ -24,11 +24,7 @@ function copyBinding(alt = false) {
   fs.copyFileSync(getBindingFile(alt), path.join(rootPath, "binding.gyp"));
 }
 
-function deleteBinding() {
-  fs.unlinkSync(path.join(rootPath, "binding.gyp"));
-}
-
-function build(alt = false) {
+function buildAlgorithm(alt = false) {
   console.log(`Using ${alt ? "alt" : "napi"}-binding`);
 
   copyBinding(alt);
@@ -60,24 +56,32 @@ function build(alt = false) {
       )
     : path.join(__dirname, "..", "build", "Release");
 
-  proc.on("close", (code, signal) => {
-    if (code === 0) {
-      fs.mkdirSync(outPath, {
-        recursive: true,
-      });
-      if (alt) {
-        const bindingLoc = path.join(outPath, TARGET_NAME(alt));
-        console.log(`Locating bindings: ${bindingLoc}`);
-        fs.copyFileSync(buildPath(alt), bindingLoc);
-        fs.rm(
-          buildPath(alt),
-          { recursive: true, force: true },
-          (err) => err && console.error
-        );
+  return new Promise((resolve, reject) => {
+    proc.on("close", (code, signal) => {
+      if (code === 0) {
+        fs.mkdirSync(outPath, {
+          recursive: true,
+        });
+        if (alt) {
+          const bindingLoc = path.join(outPath, TARGET_NAME(alt));
+          console.log(`Locating bindings: ${bindingLoc}`);
+          fs.copyFileSync(buildPath(alt), bindingLoc);
+          fs.rm(
+            buildPath(alt),
+            { recursive: true, force: true },
+            (err) => err && console.error
+          );
+        }
+        resolve();
+      } else {
+        reject();
       }
-      deleteBinding();
-    }
+    });
   });
 }
 
-build(process.argv.indexOf("--alt") > -1);
+// build(process.argv.indexOf("--alt") > -1);
+
+exports.build = (config) => function compile (cb) {
+  buildAlgorithm(config).then(cb)
+};
