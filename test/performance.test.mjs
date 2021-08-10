@@ -21,7 +21,7 @@ describe("Performance tests", () => {
   it("Creating config", () => {
     const test = new PerfTest();
     cfg = new Config("perf.cfg", true);
-    assert.equal(test.stop() < 0.01, true, "Slow!");
+    assert.equal(test.stop() < 0.1, true, "Slow!");
   });
 
   it("Set string value", () => {
@@ -39,7 +39,7 @@ describe("Performance tests", () => {
   it("Get string value", () => {
     const test = new PerfTest();
     cfg.getOfType("test", Type.String);
-    assert.equal(test.stop() < 0.1, true, "Slow!");
+    assert.equal(test.stop() < 0.01, true, "Slow!");
   });
 
   it("Save config", () => {

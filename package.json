@@ -20,7 +20,7 @@
     "configure-napi": "node-gyp configure",
     "configure": "node-gyp configure",
     "clean": "gulp clean && node-gyp clean",
-    "test": "npm run test:esm",
+    "test": "gulp testAll",
     "test:performance": "gulp testPerformance",
     "test:esm": "gulp test",
     "test:cjs": "mocha ./test/index.test.cjs",
