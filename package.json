@@ -14,8 +14,8 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "postinstall": "npm run build",
-    "build-alt": "node scripts/get-node.cjs && node scripts/build.cjs --alt",
-    "build": "node scripts/build.cjs",
+    "build-alt": "gulp buildAlt",
+    "build": "gulp build",
     "configure-alt": "node-gyp configure --nodedir ./deps/alt-node",
     "configure-napi": "node-gyp configure",
     "configure": "node-gyp configure",
