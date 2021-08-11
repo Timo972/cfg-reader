@@ -3,8 +3,10 @@ const mocha = require("gulp-mocha");
 const { getNode } = require("./scripts/get-node.cjs");
 const { build } = require("./scripts/build.cjs");
 const { clean } = require("./scripts/clean.cjs");
+const { nodeGypBuild } = require("./scripts/node-gyp-build.cjs");
 
 exports.clean = clean;
+exports.nodeGypBuild = series(nodeGypBuild, clean);
 exports.build = series(build(false), clean);
 exports.buildAlt = series(getNode, build(true), clean);
 

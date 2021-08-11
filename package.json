@@ -13,7 +13,7 @@
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "postinstall": "node-gyp-build",
+    "postinstall": "gulp nodeGypBuild",
     "build-alt": "gulp buildAlt",
     "build": "gulp build",
     "configure-alt": "node-gyp configure --nodedir ./deps/alt-node",

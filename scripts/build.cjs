@@ -90,6 +90,8 @@ function buildAlgorithm(alt = false) {
 
 exports.getBuildPath = getBuildPath;
 
+exports.copyBinding = copyBinding;
+
 exports.build = (config) =>
   async function compile() {
     await buildAlgorithm(config)
