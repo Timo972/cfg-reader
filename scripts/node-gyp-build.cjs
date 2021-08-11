@@ -1,10 +1,10 @@
-var proc = require("child_process");
-var os = require("os");
-var path = require("path");
+const proc = require("child_process");
+const os = require("os");
+//var path = require("path");
 
-const { copyBinding } = require("./build.cjs");
+const { copyBinding, build } = require("./build.cjs");
 
-function build(cb) {
+/*function build(cb) {
   var args = [
     os.platform() === "win32" ? "node-gyp.cmd" : "node-gyp",
     "rebuild",
@@ -30,13 +30,17 @@ function build(cb) {
         cb(code);
       });
     });
+}*/
+
+function buildWrapper(callback) {
+  build(false).then(callback)
 }
 
 function preinstall(cb) {
-  if (!process.argv[2]) return build(cb);
+  if (!process.argv[2]) return buildWrapper(cb);
   exec(process.argv[2]).on("exit", function (code) {
     if (code) cb(code);
-    build(cb);
+    buildWrapper(cb);
   });
 }
 
