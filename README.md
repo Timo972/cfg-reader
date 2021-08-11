@@ -46,7 +46,7 @@ testCfg.getOfType("test", Type.String);
 ```
 
 ## API
-Check out types/index.d.ts
+Check out [Typescript types](types/index.d.ts)
 
 ## Example
 
