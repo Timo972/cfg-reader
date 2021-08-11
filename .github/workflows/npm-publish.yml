@@ -126,9 +126,12 @@ jobs:
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
+
+      - name: Build
+        run: npm run build
       
       - run: npm test
-        name: Build & Test
+        name: Test
 
   publish-npm:
     needs: [test, build-alt-win32, build-alt-unix]
