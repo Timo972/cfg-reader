@@ -15,8 +15,8 @@ declare module "cfg-reader" {
     }
 
     /**
-     * 
-     */
+     * Config class
+     */    
     export class Config {
         /**
          * 
@@ -62,6 +62,13 @@ declare module "cfg-reader" {
          * @returns {ConfigValue}
          */
         public getOfType(key: string, type: ValueType | number): ConfigValue;
+        /**
+         * Get a config value with known type, faster than normal Get
+         * @param {string} key 
+         * @param {ValueType} type 
+         * @returns {ReturnValueType}
+         */
+        public getOfType<ReturnValueType>(key: string, type: ValueType | number): ReturnValueType;
         /**
          * Serialize config 
          * @param {boolean} useCommas [default: false]
