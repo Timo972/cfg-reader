@@ -101,5 +101,6 @@
         "unordered_set": "cpp",
         "valarray": "cpp",
         "variant": "cpp"
-    }
+    },
+    "git.ignoreLimitWarning": true
 }

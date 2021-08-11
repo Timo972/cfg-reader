@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const prebuildify = require("prebuildify");
 const { spawn } = require("child_process");
 const { ALT_NODE_VERSION } = require("./alt-constants.cjs");
 
@@ -44,41 +45,45 @@ function buildAlgorithm(alt = false) {
 
   copyBinding(alt);
 
-  const proc = spawn(
-    alt
-      ? `npx node-gyp rebuild --nodedir ${path.normalize(nodePath)}`
-      : "npx node-gyp rebuild",
-    {
-      cwd: process.cwd(),
-      shell: true,
-    }
-  );
-
-  proc.on("error", console.error);
-
-  proc.stdout.pipe(process.stdout);
-  proc.stderr.pipe(process.stderr);
-  process.stdin.pipe(proc.stdin);
-
-  const outPath = getOutPath(alt);
-
-  return new Promise((resolve, reject) => {
-    proc.on("close", (code, signal) => {
-      if (code === 0) {
-        fs.mkdirSync(outPath, {
-          recursive: true,
-        });
-        if (alt) {
-          const bindingLoc = path.join(outPath, TARGET_NAME(alt));
-          console.log(`Locating bindings: ${bindingLoc}`);
-          fs.copyFileSync(getBuildPath(alt), bindingLoc);
-        }
-        resolve();
-      } else {
-        reject();
+  if (alt) {
+    const proc = spawn(
+      alt
+        ? `npx node-gyp rebuild --nodedir ${path.normalize(nodePath)}`
+        : "npx node-gyp rebuild",
+      {
+        cwd: process.cwd(),
+        shell: true,
       }
+    );
+
+    proc.on("error", console.error);
+
+    proc.stdout.pipe(process.stdout);
+    proc.stderr.pipe(process.stderr);
+    process.stdin.pipe(proc.stdin);
+
+    const outPath = getOutPath(alt);
+
+    return new Promise((resolve, reject) => {
+      proc.on("close", (code, signal) => {
+        if (code === 0) {
+          fs.mkdirSync(outPath, {
+            recursive: true,
+          });
+          if (alt) {
+            const bindingLoc = path.join(outPath, TARGET_NAME(alt));
+            console.log(`Locating bindings: ${bindingLoc}`);
+            fs.copyFileSync(getBuildPath(alt), bindingLoc);
+          }
+          resolve();
+        } else {
+          reject();
+        }
+      });
     });
-  });
+  } else {
+    return new Promise((resolve) => prebuildify({ napi: true }, resolve));
+  }
 }
 
 // build(process.argv.indexOf("--alt") > -1);
@@ -86,6 +91,6 @@ function buildAlgorithm(alt = false) {
 exports.getBuildPath = getBuildPath;
 
 exports.build = (config) =>
-  function compile(cb) {
-    buildAlgorithm(config).then(cb);
+  async function compile() {
+    await buildAlgorithm(config)
   };

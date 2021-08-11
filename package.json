@@ -13,7 +13,7 @@
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "postinstall": "echo \"Thanks for using cfg-reader!\"",
+    "postinstall": "node-gyp-build",
     "build-alt": "gulp buildAlt",
     "build": "gulp build",
     "configure-alt": "node-gyp configure --nodedir ./deps/alt-node",
@@ -49,6 +49,8 @@
     "@octokit/rest": "^18.7.1",
     "download": "^8.0.0",
     "gulp-mocha": "^8.0.0",
+    "fs": "0.0.1-security",
+    "gulp": "^4.0.2",
     "mocha": "^8.3.0",
     "node-gyp": "^8.1.0",
     "node-stream-zip": "^1.13.6",
@@ -56,12 +58,17 @@
   },
   "dependencies": {
     "bindings": "^1.5.0",
-    "fs": "0.0.1-security",
     "node-addon-api": "^3.1.0",
-    "gulp": "^4.0.2"
+    "node-gyp-build": "^4.2.3",
+    "prebuildify": "^4.2.0"
   },
   "engines": {
     "node": ">= 12"
+  },
+  "binary": {
+    "napi_versions": [
+      3
+    ]
   },
   "gypfile": true
 }
