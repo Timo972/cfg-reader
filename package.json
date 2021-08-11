@@ -13,7 +13,7 @@
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "postinstall": "gulp nodeGypBuild",
+    "postinstall": "echo \"Thanks for installing cfg-reader\"",
     "build-alt": "gulp buildAlt",
     "build": "gulp build",
     "configure-alt": "node-gyp configure --nodedir ./deps/alt-node",
