@@ -14,6 +14,22 @@ class Node:
         self.value = value
         self.type = 0
 
+        if isinstance(value, str) or isinstance(value, int) or isinstance(value, float) or isinstance(value, bool):
+            self.type = Type.SCALAR
+            self.value = str(value)
+
+        elif isinstance(value, list):
+            self.type = Type.LIST
+            self.value = []
+            for val in value:
+                self.value.append(Node(val))
+
+        elif isinstance(value, dict):
+            self.type = Type.DICT
+            self.value = {}
+            for key, value in value.items():
+                self.value[key] = Node(value)
+
     def is_none(self):
         return self.type == Type.NONE
 
