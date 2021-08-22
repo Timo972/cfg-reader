@@ -1,5 +1,6 @@
 from .io import *
-from node import *
+from .node import *
+from .emitter import *
 
 
 class Config:
@@ -21,6 +22,15 @@ class Config:
         node = Node(value)
         self.node[key] = node
 
+    def serialize(self, use_commas: bool = False, use_apostrophes: bool = False):
+        emitter = Emitter()
+        emitter.emit(self.node, 0, True, use_commas, use_apostrophes)
+        return emitter.get_string()
+
+    def save(self, use_commas: bool = False, use_apostrophes: bool = False):
+        emitter = Emitter()
+        emitter.emit(self.node, 0, True, use_commas, use_apostrophes)
+        write_file(self.name, emitter.get_string())
 
 def convert(node: Node):
     for i in range(5):
