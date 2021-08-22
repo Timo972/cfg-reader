@@ -11,8 +11,8 @@ class Type(enum.Enum):
 
 class Node:
     def __init__(self, value):
-        self.value = value
-        self.type = 0
+        self.type = Type.NONE
+        self.value = None
 
         if isinstance(value, str) or isinstance(value, int) or isinstance(value, float) or isinstance(value, bool):
             self.type = Type.SCALAR
