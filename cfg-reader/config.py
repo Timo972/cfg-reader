@@ -1,4 +1,4 @@
-from cfg_io import *
+from .io import *
 from node import *
 
 

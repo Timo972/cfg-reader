@@ -1,4 +1,4 @@
-from parse import *
+from .parser import *
 
 
 def read_file(file_name: str):
