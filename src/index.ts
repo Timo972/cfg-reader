@@ -1,4 +1,5 @@
-import { readFile } from 'fs/promises';
+import { readFileSync } from "fs";
+//import { readFile } from "fs/promises";
 import { Node, Dict, List, Scalar, NodeType } from "./node";
 import { Parser } from "./parser";
 
@@ -22,23 +23,31 @@ export class Config {
 
   constructor(fileName: string, p2?: Object | boolean) {
     if (typeof fileName !== "string") {
-      throw new Error("[CFG-READER]: invalid constructor call");
+      throw new Error(
+        "[CFG-READER]: invalid constructor call, fileName must be type string"
+      );
     }
 
-    if (typeof p2 !== "boolean" && !(p2 instanceof Object)) {
+    if (typeof p2 !== "boolean" && !(p2 instanceof Object) && p2 != null) {
       throw new Error("[CFG-READER]: invalid constructor call");
     }
 
     if (p2 == null) {
-      this.loadFile(fileName).then(this.parse.bind(this));
+      //this.loadFile(fileName).then(this.parse.bind(this));
+      this.loadFile(fileName);
+      this.parse();
     } else if (p2 instanceof Object) {
     } else if (typeof p2 === "boolean") {
     }
   }
 
-  protected async loadFile(path: string): Promise<void> {
-    const buffer = await readFile(path, { encoding: "utf8" });
-    this.content = buffer;
+  //protected async loadFile(path: string): Promise<void> {
+  //  const buffer = await readFile(path, { encoding: "utf8" });
+  //  this.content = buffer;
+  //}
+
+  protected loadFile(path: string): void {
+    this.content = readFileSync(path, { encoding: "utf8" });
   }
 
   protected parseNode(node: Node<Dict | List | Scalar>): ConfigValue {
@@ -108,18 +117,16 @@ export class Config {
   }
 
   public save(useCommas?: boolean, useApostrophe?: boolean): boolean {
-      return false;
+    return false;
   }
 
   // public getOfType(key: string, type: ValueType | number): ConfigValue {}
 
-  public getOfType<ReturnValueType>(
-    key: string
-  ): ReturnValueType {
+  public getOfType<ReturnValueType>(key: string): ReturnValueType {
     return this.config[key] as unknown as ReturnValueType;
   }
 
   public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
-      return "";
+    return "";
   }
 }

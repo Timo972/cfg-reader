@@ -14,9 +14,9 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "build": "rollup -c",
-    "test": "gulp test",
-    "test:performance": "gulp testPerformance",
-    "test:esm": "gulp test",
+    "test": "mocha",
+    "test:performance": "mocha ./test/performance.test.mjs",
+    "test:esm": "mocha ./test/unit.test.mjs",
     "test:cjs": "mocha ./test/index.test.cjs"
   },
   "repository": {
@@ -42,8 +42,6 @@
     "@rollup/plugin-typescript": "^8.2.5",
     "@types/node": "^16.10.2",
     "fs": "0.0.1-security",
-    "gulp": "^4.0.2",
-    "gulp-mocha": "^8.0.0",
     "mocha": "^8.3.0",
     "rollup": "^2.58.0"
   },

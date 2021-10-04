@@ -1,4 +1,4 @@
-import { Config } from "../index.mjs";
+import { Config } from "../dist/index.mjs";
 import { strict as assert } from "assert";
 import fs from "fs";
 
@@ -256,14 +256,14 @@ describe("Existing config", () => {
     });
   });
 
-  describe("Utility", () => {
-    it("Config::Serialize", () => {
-      const config = new Config(fileName);
-      const content = fs.readFileSync(fileName, { encoding: "utf8" });
-
-      const serialized = config.serialize();
-    });
-  });
+  //describe("Utility", () => {
+  //  it("Config::Serialize", () => {
+  //    const config = new Config(fileName);
+  //    const content = fs.readFileSync(fileName, { encoding: "utf8" });
+//
+  //    const serialized = config.serialize();
+  //  });
+  //});
 });
 
 describe("New config", () => {

@@ -1,4 +1,4 @@
-const { Config, Type } = require('../index.cjs');
+const { Config } = require('../dist/index.cjs');
 const assert = require('assert').strict;
 const fs = require('fs');
 

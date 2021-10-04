@@ -1,4 +1,4 @@
-import { Config, Type } from "../index.mjs";
+import { Config } from "../dist/index.mjs";
 import { strict as assert } from "assert";
 import fs from "fs";
 
@@ -38,7 +38,7 @@ describe("Performance tests", () => {
 
   it("Get string value", () => {
     const test = new PerfTest();
-    cfg.getOfType("test", Type.String);
+    cfg.getOfType("test");
     assert.equal(test.stop() < 0.01, true, "Slow!");
   });
 
