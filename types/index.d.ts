@@ -23,30 +23,35 @@ declare module "cfg-reader" {
          * @param {string} fileName 
          */
         constructor(fileName: string);
+        
         /**
          * 
          * @param {string} fileName 
          * @param {boolean} createIfNotExist [default: false]
          */
         constructor(fileName: string, createIfNotExist: boolean);
+
         /**
          * 
          * @param {string} fileName 
          * @param {Object} predefinedValues 
          */
         constructor(fileName: string, predefinedValues: Object);
+
         /**
          * Get a config value with unknown type, slower than GetOfType
          * @param {string} key 
          * @returns {ConfigValue}
          */
         public get(key: string): ConfigValue;
+
         /**
          * Set a config value
          * @param {string} key 
          * @param {any} value 
          */
         public set(key: string, value: ConfigValue): void;
+
         /**
          * Save the current changes to the opened file
          * @param {boolean} useCommas [default: false]
@@ -55,13 +60,7 @@ declare module "cfg-reader" {
          * @returns boolean
          */
         public save(useCommas?: boolean, useApostrophe?: boolean): boolean;
-        /**
-         * Get a config value with known type, faster than normal Get
-         * @param {string} key 
-         * @param {ValueType} type 
-         * @returns {ConfigValue}
-         */
-        public getOfType(key: string, type: ValueType | number): ConfigValue;
+
         /**
          * Get a config value with known type, faster than normal Get
          * @param {string} key 
@@ -69,6 +68,7 @@ declare module "cfg-reader" {
          * @returns {ReturnValueType}
          */
         public getOfType<ReturnValueType>(key: string, type: ValueType | number): ReturnValueType;
+
         /**
          * Serialize config 
          * @param {boolean} useCommas [default: false]

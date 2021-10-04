@@ -1,6 +1,0 @@
-[submodule "deps/alt-config"]
-	path = deps/alt-config
-	url = https://github.com/Timo972/alt-config
-[submodule "deps/alt-node"]
-	path = deps/alt-node
-	url = https://github.com/altmp/alt-node
