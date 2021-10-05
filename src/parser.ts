@@ -10,6 +10,12 @@ export enum TokenType {
     Scalar
 }
 
+export enum ErrorType {
+    KeyExpected,
+    InvalidToken,
+    UnexpectedEOF
+}
+
 class Token {
     public type: TokenType;
     public value: string;
@@ -34,9 +40,11 @@ export class Parser {
     public line: number = 0;
     public column: number = 0;
     public tokIdx: number = 0;
+    public filePath: string;
 
-    constructor(content: string) {
+    constructor(content: string, filePath?: string) {
         this.buffer = content;
+        this.filePath = filePath;
     }
 
     public parse(): Node<Dict> {
@@ -56,13 +64,14 @@ export class Parser {
 
     protected get(): string {
         this.column++;
-        if (this.peek(0) == '\n') {
+        if (this.peek() == '\n') {
             this.line++;
             this.column = 0;
         }
-        const currPos = this.readPos;
-        this.readPos++;
-        return this.buffer[currPos];
+        //const currPos = this.readPos;
+        //this.readPos++;
+        //return this.buffer[currPos];
+        return this.buffer[this.readPos++];
     }
 
     protected skip(n: number = 1): void {
@@ -78,10 +87,9 @@ export class Parser {
 
     protected skipNextToken(): void {
         while(this.unread() > 0) {
-            const peekChar = this.peek();
-            if (peekChar == ' ' || peekChar == '\n' || peekChar == '\r' || peekChar == '\t' || peekChar == ',') {
+            if (this.peek() == ' ' || this.peek() == '\n' || this.peek() == '\r' || this.peek() == '\t' || this.peek() == ',') {
                 this.skip();
-            } else if (peekChar == '#') {
+            } else if (this.peek() == '#') {
                 this.skip();
 
                 while (this.unread() > 0 && this.peek() != '\n' && this.peek() != '#') {
@@ -106,30 +114,28 @@ export class Parser {
             if (this.unread() == 0) {
                 break;
             }
-
-            const peek = this.peek();
-            if (peek == '[') {
+            if ( this.peek() == '[') {
                 this.skip();
                 this.tokens.push(new Token(TokenType.ArrayStart, "", this.readPos, this.line, this.column));
-            } else if (peek == ']') {
+            } else if ( this.peek() == ']') {
                 this.skip();
                 this.tokens.push(new Token(TokenType.ArrayEnd, "", this.readPos, this.line, this.column));
-            } else if (peek == '{') {
+            } else if ( this.peek() == '{') {
                 this.skip();
                 this.tokens.push(new Token(TokenType.DictStart, "", this.readPos, this.line, this.column));
-            } else if (peek == '}') {
+            } else if ( this.peek() == '}') {
                 this.skip();
                 this.tokens.push(new Token(TokenType.DictEnd, "", this.readPos, this.line, this.column));
             } else {
                 let val = "";
 
-                if (peek == '\'' || peek == '"') {
+                if ( this.peek() == '\'' ||  this.peek() == '"') {
                     const start = this.get();
 
-                    if (peek != start) {
+                    if ( this.peek() != start) {
                         while (this.unread() > 1 && (this.peek() == '\\' || this.peek(1) != start)) {
                             if (this.peek() == '\n' || this.peek() == '\r') {
-                                if (this.get() == '\n' || this.peek() == '\n') {
+                                if (this.get() == '\r' || this.peek() == '\n') {
                                     this.skip();
                                 }
                                 val += "\n";
@@ -143,7 +149,7 @@ export class Parser {
                         }
 
                         if (this.unread() == 0) {
-                            throw new Error("unexpected end of file");
+                            throw new Error(this.createParseError(ErrorType.UnexpectedEOF, this.line, this.column));
                         }
                     }
 
@@ -179,6 +185,29 @@ export class Parser {
         return; // end
     }
 
+    protected createParseError(type: ErrorType, token: Token | number, col?: number): string {
+        let line: number;
+        if (token instanceof Token) {
+            col = token.col;
+            line = token.line;
+        } else
+            line = token;
+
+        line++;
+        col++;
+
+        const place = this.filePath ? `${this.filePath}:${line}:${col}` : `${line}:${col}`;
+        const base = `[CFG-READER] error at line ${place} -> `;
+
+        switch (type) {
+            case ErrorType.KeyExpected:
+                return base + `key expected`;
+            case ErrorType.InvalidToken:
+                return base + `invalid token`;
+            case ErrorType.UnexpectedEOF:
+                return base + `unexpected end of file`;
+        }
+    }
 
     protected parseToken(): Node<Dict | List | Scalar> {
         const token = this.tokens[this.tokIdx];
@@ -201,18 +230,18 @@ export class Parser {
                     this.tokIdx++;
                     const nextTok = this.tokens[this.tokIdx];
                     if (nextTok.type != TokenType.Key) {
-                        throw new Error(`[CFG-READER] error at line ${nextTok.line}: key expected`);
+                        throw new Error(this.createParseError(ErrorType.KeyExpected, nextTok));
                     }
 
                     const key = nextTok.value;
                     this.tokIdx++;
                     const node = this.parseToken();
-                    dict[key] = node;
+                    dict.value[key] = node;
                 }
 
                 return dict;
         }
 
-        throw new Error(`[CFG-READER] error at line ${token.line}: invalid token`);
+        throw new Error(this.createParseError(ErrorType.InvalidToken, token));
     }
 }

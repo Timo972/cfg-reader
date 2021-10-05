@@ -12,7 +12,7 @@ export default {
       format: "cjs",
     },
   ],
-  external: ['fs/promises','fs'],
+  external: ['fs/promises', 'fs', 'stream'],
   plugins: [
     typescript({
       allowJs: true,

@@ -1,4 +1,6 @@
-import { readFileSync } from "fs";
+import { createWriteStream, existsSync, readFileSync, writeFileSync } from "fs";
+import { Writable } from 'stream';
+import { Emitter } from "./emitter";
 //import { readFile } from "fs/promises";
 import { Node, Dict, List, Scalar, NodeType } from "./node";
 import { Parser } from "./parser";
@@ -17,27 +19,35 @@ export const enum ValueType {
 
 export class Config {
   protected parser: Parser;
-  protected emitter: any;
+  protected emitter: Emitter = new Emitter();
   protected content: string;
-  protected config: { [key: string]: ConfigValue };
+  public config: JSDict = {};
+  public fileName: string;
 
-  constructor(fileName: string, p2?: Object | boolean) {
+  constructor(fileName: string, preDefines?: Object) {
     if (typeof fileName !== "string") {
       throw new Error(
         "[CFG-READER]: invalid constructor call, fileName must be type string"
       );
     }
 
-    if (typeof p2 !== "boolean" && !(p2 instanceof Object) && p2 != null) {
-      throw new Error("[CFG-READER]: invalid constructor call");
+    this.fileName = fileName;
+
+    if (!(preDefines instanceof Object) && preDefines != null) {
+      throw new Error("[CFG-READER]: invalid constructor call, preDefines must be null or Object");
     }
 
-    if (p2 == null) {
+    if (preDefines == null && this.existsFile(fileName)) {
       //this.loadFile(fileName).then(this.parse.bind(this));
-      this.loadFile(fileName);
-      this.parse();
-    } else if (p2 instanceof Object) {
-    } else if (typeof p2 === "boolean") {
+        this.loadFile(fileName);
+        this.parse();
+    } else if (preDefines instanceof Object) {
+      this.config = preDefines as JSDict;
+
+      if (this.existsFile(fileName)) {
+        this.loadFile(fileName);
+        this.parse();
+      }
     }
   }
 
@@ -45,6 +55,14 @@ export class Config {
   //  const buffer = await readFile(path, { encoding: "utf8" });
   //  this.content = buffer;
   //}
+
+  protected existsFile(path: string): boolean {
+      return existsSync(path);
+  }
+
+  protected createFile(path: string): void {
+    writeFileSync(path, "", { encoding: "utf8" });
+  }
 
   protected loadFile(path: string): void {
     this.content = readFileSync(path, { encoding: "utf8" });
@@ -101,11 +119,12 @@ export class Config {
       throw new Error(`[CFG-READER]: no file loaded (internal)`);
     }
 
-    this.parser = new Parser(this.content);
+    this.parser = new Parser(this.content, this.fileName);
 
     const node = this.parser.parse();
 
-    this.config = this.parseNode(node) as JSDict;
+    const config = this.parseNode(node) as JSDict;
+    this.config = Object.assign(this.config, config);
   }
 
   public get(key: string): ConfigValue {
@@ -116,8 +135,16 @@ export class Config {
     this.config[key] = value;
   }
 
-  public save(useCommas?: boolean, useApostrophe?: boolean): boolean {
-    return false;
+  public save(useCommas?: boolean, useApostrophe?: boolean): Promise<void> {
+    if (!this.existsFile(this.fileName))
+        this.createFile(this.fileName);
+
+    const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
+    this.emitter.emitConfigValue(this.config, os);
+
+    return new Promise((resolve: CallableFunction) => {
+        os.end(resolve);
+    });
   }
 
   // public getOfType(key: string, type: ValueType | number): ConfigValue {}
@@ -126,7 +153,12 @@ export class Config {
     return this.config[key] as unknown as ReturnValueType;
   }
 
-  public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
-    return "";
+  public serialize(useCommas?: boolean, useApostrophe?: boolean): Promise<Writable> {
+    const stream = new Writable({defaultEncoding: 'utf8'});
+    this.emitter.emitConfigValue(this.config, stream);
+    
+    return new Promise<Writable>((resolve: CallableFunction) => {
+        stream.end(() => resolve(stream));
+    });
   }
 }

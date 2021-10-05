@@ -12,7 +12,7 @@ on:
 
 jobs:
   test:
-    name: Build & Test (NAPI)
+    name: Build & Test
     runs-on: windows-2019
     strategy:
       matrix:
@@ -45,5 +45,8 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
 
+      - run: npm run build
+        name: Build
+
       - run: npm test
-        name: Build & Test
+        name: Test

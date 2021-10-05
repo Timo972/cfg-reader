@@ -15,9 +15,9 @@
   "scripts": {
     "build": "rollup -c",
     "test": "mocha",
-    "test:performance": "mocha ./test/performance.test.mjs",
-    "test:esm": "mocha ./test/unit.test.mjs",
-    "test:cjs": "mocha ./test/index.test.cjs"
+    "test:scalar": "mocha ./test/scalar.test.mjs",
+    "test:list": "mocha ./test/list.test.mjs",
+    "test:dict": "mocha ./test/dict.test.mjs"
   },
   "repository": {
     "type": "git",
