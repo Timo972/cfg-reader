@@ -1,7 +1,7 @@
-import { createWriteStream, existsSync, readFileSync, writeFileSync } from "fs";
-import { Writable } from 'stream';
+import { /*createWriteStream,*/ existsSync, readFileSync, writeFileSync } from "fs";
+import { writeFile } from "fs/promises";
+//import { Writable } from 'stream';
 import { Emitter } from "./emitter";
-//import { readFile } from "fs/promises";
 import { Node, Dict, List, Scalar, NodeType } from "./node";
 import { Parser } from "./parser";
 
@@ -19,7 +19,7 @@ export const enum ValueType {
 
 export class Config {
   protected parser: Parser;
-  protected emitter: Emitter = new Emitter();
+  protected emitter: Emitter;
   protected content: string;
   public config: JSDict = {};
   public fileName: string;
@@ -50,11 +50,6 @@ export class Config {
       }
     }
   }
-
-  //protected async loadFile(path: string): Promise<void> {
-  //  const buffer = await readFile(path, { encoding: "utf8" });
-  //  this.content = buffer;
-  //}
 
   protected existsFile(path: string): boolean {
       return existsSync(path);
@@ -135,16 +130,18 @@ export class Config {
     this.config[key] = value;
   }
 
-  public save(useCommas?: boolean, useApostrophe?: boolean): Promise<void> {
+  public async save(useCommas?: boolean, useApostrophe?: boolean): Promise<void> {
     if (!this.existsFile(this.fileName))
         this.createFile(this.fileName);
 
-    const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
-    this.emitter.emitConfigValue(this.config, os, 0, true, useCommas, useApostrophe);
+    //const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
+    this.emitter = new Emitter();
+    this.emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
 
-    return new Promise((resolve: CallableFunction) => {
-        os.end(resolve);
-    });
+    await writeFile(this.fileName, this.emitter.stream, { encoding: 'utf8'});
+    //return new Promise((resolve: CallableFunction) => {
+    //    os.end(resolve);
+    //});
   }
 
   // public getOfType(key: string, type: ValueType | number): ConfigValue {}
@@ -153,12 +150,14 @@ export class Config {
     return this.config[key] as unknown as ReturnValueType;
   }
 
-  public serialize(useCommas?: boolean, useApostrophe?: boolean): Promise<Writable> {
-    const stream = new Writable({defaultEncoding: 'utf8'});
-    this.emitter.emitConfigValue(this.config, stream, 0, true, useCommas, useApostrophe);
+  public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
+    //const stream = new Writable({defaultEncoding: 'utf8'});
+    this.emitter = new Emitter();
+    this.emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
+    return this.emitter.stream;
     
-    return new Promise<Writable>((resolve: CallableFunction) => {
-        stream.end(() => resolve(stream));
-    });
+    //return new Promise<Writable>((resolve: CallableFunction) => {
+    //    stream.end(() => resolve(stream));
+    //});
   }
 }

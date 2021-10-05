@@ -4,6 +4,7 @@ import { Detail } from './detail';
 import { Dict, List, Node, NodeType, Scalar } from "./node";
 
 export class Emitter {
+    public stream: string = "";
     public emitNode(node: Node<Dict | List | Scalar>, os: Writable, indent: number = 0, isLast: boolean = true): void {
         const _indent = ' '.repeat(indent * 2);
 
@@ -40,20 +41,24 @@ export class Emitter {
         }
     }
 
-    public emitConfigValue(value: ConfigValue, os: Writable, indent: number = 0, isLast: boolean = true, commas: boolean = true, apostrophes: boolean = true): void {
+    public emitConfigValue(value: ConfigValue, indent: number = 0, isLast: boolean = true, commas: boolean = true, apostrophes: boolean = true): void {
         const _indent = ' '.repeat(indent * 2);
 
         if (value instanceof Array) {
-            os.write('[\n');
+            //os.write('[\n');
+            this.stream += '[\n';
             for (let i = 0; i < value.length; i++) {
-                os.write(_indent);
-                this.emitConfigValue(value[i], os, indent + 1, i == value.length - 1);
+                //os.write(_indent);
+                this.stream += _indent;
+                this.emitConfigValue(value[i], indent + 1, i == value.length - 1);
             }
 
-            os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? ']\n' : '],\n'}`);
+            //os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? ']\n' : '],\n'}`);
+            this.stream += _indent.repeat(indent - 1) + `${isLast || !commas ? ']\n' : '],\n'}`;
         } else if (value instanceof Object) {
             if (indent > 0)
-                os.write('{\n');
+                //os.write('{\n');
+                this.stream += '{\n';
 
             const keys = Object.keys(value);
             for (let i = 0; i < keys.length; i++) {
@@ -63,18 +68,23 @@ export class Emitter {
                 if (_value == null)
                     continue;
 
-                os.write(_indent + key + ':');
-                this.emitConfigValue(_value, os, indent + 1, i == keys.length - 1);
+                //os.write(_indent + key + ':');
+                this.stream += _indent + key + ':';
+                this.emitConfigValue(_value, indent + 1, i == keys.length - 1);
             }
 
             if (indent > 0)
-                os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`);
+                //os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`);
+                this.stream += _indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`;
         } else if (typeof value === "boolean") {
-            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
         } else if (typeof value === "string") {
-            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
         } else if (typeof value === "number") {
-            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
+            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
         }
     }
 }
