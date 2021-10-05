@@ -1,6 +1,8 @@
-import typescript from '@rollup/plugin-typescript';
+//import typescript from '@rollup/plugin-typescript';
+import typescript from 'rollup-plugin-typescript2';
+import dts from 'rollup-plugin-dts';
 
-export default {
+export default [{
   input: "src/index.ts",
   output: [
     {
@@ -26,5 +28,14 @@ export default {
       declarationDir: './types'
     })
   ]
-};
+},
+{
+  input: "./dist/index.d.ts",
+  output: [{
+    file: "types/index.d.ts",
+    format: "es"
+  }],
+  plugins: [dts()],
+}
+];
 
