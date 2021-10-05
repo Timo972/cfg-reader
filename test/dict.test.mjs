@@ -60,7 +60,7 @@ describe("Dicts", () => {
     );
   });
 
-  it("Get inline dict", () => {
+  xit("Get inline dict", () => {
     //console.log(fs.readFileSync(fileName, 'utf8'));
     const val = config.get(existingInlineDictKey);
     assert.deepStrictEqual(
