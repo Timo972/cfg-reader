@@ -1,5 +1,10 @@
-import { /*createWriteStream,*/ existsSync, readFileSync, writeFileSync } from "fs";
-import { writeFile } from "fs/promises";
+import {
+  /*createWriteStream,*/ existsSync,
+  readFileSync,
+  writeFileSync,
+  writeFile,
+} from "fs";
+import { promisify } from "util";
 //import { Writable } from 'stream';
 import { Emitter } from "./emitter";
 import { Node, Dict, List, Scalar, NodeType } from "./node";
@@ -34,13 +39,15 @@ export class Config {
     this.fileName = fileName;
 
     if (!(preDefines instanceof Object) && preDefines != null) {
-      throw new Error("[CFG-READER]: invalid constructor call, preDefines must be null or Object");
+      throw new Error(
+        "[CFG-READER]: invalid constructor call, preDefines must be null or Object"
+      );
     }
 
     if (preDefines == null && this.existsFile(fileName)) {
       //this.loadFile(fileName).then(this.parse.bind(this));
-        this.loadFile(fileName);
-        this.parse();
+      this.loadFile(fileName);
+      this.parse();
     } else if (preDefines instanceof Object) {
       this.config = preDefines as JSDict;
 
@@ -52,7 +59,7 @@ export class Config {
   }
 
   protected existsFile(path: string): boolean {
-      return existsSync(path);
+    return existsSync(path);
   }
 
   protected createFile(path: string): void {
@@ -65,7 +72,7 @@ export class Config {
 
   protected parseNode(node: Node<Dict | List | Scalar>): ConfigValue {
     if (node.type == NodeType.Dict) {
-      const dict = {};
+      const dict: JSDict = {};
 
       for (const key in (node as Node<Dict>).value) {
         const valueNode = (node as Node<Dict>).value[key] as Node<
@@ -79,7 +86,7 @@ export class Config {
       return dict;
     } else if (node.type == NodeType.List) {
       const length = (node as Node<List>).value.length;
-      const list = new Array(length);
+      const list: JSList = new Array(length);
 
       for (let i = 0; i < length; i++) {
         const valueNode = (node as Node<List>).value[i];
@@ -130,15 +137,23 @@ export class Config {
     this.config[key] = value;
   }
 
-  public async save(useCommas?: boolean, useApostrophe?: boolean): Promise<void> {
-    if (!this.existsFile(this.fileName))
-        this.createFile(this.fileName);
+  public async save(
+    useCommas?: boolean,
+    useApostrophe?: boolean
+  ): Promise<void> {
+    if (!this.existsFile(this.fileName)) this.createFile(this.fileName);
 
     //const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
     this.emitter = new Emitter();
-    this.emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
+    this.emitter.emitConfigValue(
+      this.config,
+      0,
+      true,
+      useCommas,
+      useApostrophe
+    );
 
-    await writeFile(this.fileName, this.emitter.stream, { encoding: 'utf8'});
+    await promisify(writeFile)(this.fileName, this.emitter.stream, { encoding: "utf8" });
     //return new Promise((resolve: CallableFunction) => {
     //    os.end(resolve);
     //});
@@ -153,9 +168,15 @@ export class Config {
   public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
     //const stream = new Writable({defaultEncoding: 'utf8'});
     this.emitter = new Emitter();
-    this.emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
+    this.emitter.emitConfigValue(
+      this.config,
+      0,
+      true,
+      useCommas,
+      useApostrophe
+    );
     return this.emitter.stream;
-    
+
     //return new Promise<Writable>((resolve: CallableFunction) => {
     //    stream.end(() => resolve(stream));
     //});

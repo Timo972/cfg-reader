@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "allowJs": true,
+        "alwaysStrict": true,
+        "baseUrl": "./",
+        "checkJs": true,
+        "declaration": true,
+        "declarationDir": "./types",
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "noImplicitAny": true,
+        "rootDir": "./src",
+        "outDir": "./dist"
+    },
+    "exclude": [
+        "rollup.config.js",
+        "test/*",
+        "dist/*",
+        "node_modules"
+    ]
+}
