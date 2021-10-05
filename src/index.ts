@@ -140,7 +140,7 @@ export class Config {
         this.createFile(this.fileName);
 
     const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
-    this.emitter.emitConfigValue(this.config, os);
+    this.emitter.emitConfigValue(this.config, os, 0, true, useCommas, useApostrophe);
 
     return new Promise((resolve: CallableFunction) => {
         os.end(resolve);
@@ -155,7 +155,7 @@ export class Config {
 
   public serialize(useCommas?: boolean, useApostrophe?: boolean): Promise<Writable> {
     const stream = new Writable({defaultEncoding: 'utf8'});
-    this.emitter.emitConfigValue(this.config, stream);
+    this.emitter.emitConfigValue(this.config, stream, 0, true, useCommas, useApostrophe);
     
     return new Promise<Writable>((resolve: CallableFunction) => {
         stream.end(() => resolve(stream));

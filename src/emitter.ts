@@ -40,7 +40,7 @@ export class Emitter {
         }
     }
 
-    public emitConfigValue(value: ConfigValue, os: Writable, indent: number = 0, isLast: boolean = true): void {
+    public emitConfigValue(value: ConfigValue, os: Writable, indent: number = 0, isLast: boolean = true, commas: boolean = true, apostrophes: boolean = true): void {
         const _indent = ' '.repeat(indent * 2);
 
         if (value instanceof Array) {
@@ -50,7 +50,7 @@ export class Emitter {
                 this.emitConfigValue(value[i], os, indent + 1, i == value.length - 1);
             }
 
-            os.write(_indent.repeat(indent - 1) + `${isLast ? ']\n' : '],\n'}`);
+            os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? ']\n' : '],\n'}`);
         } else if (value instanceof Object) {
             if (indent > 0)
                 os.write('{\n');
@@ -68,13 +68,13 @@ export class Emitter {
             }
 
             if (indent > 0)
-                os.write(_indent.repeat(indent - 1) + `${isLast ? '}\n' : '},\n'}`);
+                os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`);
         } else if (typeof value === "boolean") {
-            os.write(`'${Detail.Escape(String(value))}',\n`);
+            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
         } else if (typeof value === "string") {
-            os.write(`'${Detail.Escape(value)}',\n`);
+            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
         } else if (typeof value === "number") {
-            os.write(`'${Detail.Escape(value.toString())}',\n`);
+            os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
         }
     }
 }
