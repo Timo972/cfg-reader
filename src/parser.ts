@@ -50,9 +50,6 @@ export class Parser {
     public parse(): Node<Dict> {
         this.tokenize();
 
-        console.log('Tokens:');
-        console.table(this.tokens);
-
         return this.parseToken() as unknown as Node<Dict>;
     }
 

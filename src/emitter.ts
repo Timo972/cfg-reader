@@ -78,13 +78,13 @@ export class Emitter {
                 this.stream += _indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`;
         } else if (typeof value === "boolean") {
             //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
+            this.stream += (apostrophes ? "'" : '') + Detail.Escape(String(value)) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
         } else if (typeof value === "string") {
             //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
+            this.stream += (apostrophes ? "'" : '') + Detail.Escape(value) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
         } else if (typeof value === "number") {
             //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += `${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`;
+            this.stream += (apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
         }
     }
 }
