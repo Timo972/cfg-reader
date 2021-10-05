@@ -13,7 +13,6 @@
         "experimentalDecorators": true,
         "noImplicitAny": true,
         "rootDir": "./src",
-        "outDir": "./dist"
     },
     "exclude": [
         "rollup.config.js",

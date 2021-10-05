@@ -12,7 +12,7 @@ export default {
       format: "cjs",
     },
   ],
-  external: ['fs/promises', 'fs', 'stream'],
+  external: ['fs', 'stream', 'util'],
   plugins: [
     typescript({
       allowJs: true,
@@ -21,7 +21,9 @@ export default {
       baseUrl: './',
       rootDir: './src',
       esModuleInterop: true,
-      moduleResolution: "node"
+      moduleResolution: "node",
+      declaration: true,
+      declarationDir: './types'
     })
   ]
 };

@@ -1,34 +1,31 @@
-import {
-  /*createWriteStream,*/ existsSync,
-  readFileSync,
-  writeFileSync,
-  writeFile,
-} from "fs";
+import { existsSync, readFileSync, writeFileSync, writeFile } from "fs";
 import { promisify } from "util";
-//import { Writable } from 'stream';
 import { Emitter } from "./emitter";
-import { Node, Dict, List, Scalar, NodeType } from "./node";
+import {
+  Node,
+  Dict as NodeDict,
+  List as NodeList,
+  Scalar as NodeScalar,
+  NodeType,
+} from "./node";
 import { Parser } from "./parser";
 
-export type JSDict = { [key: string]: ConfigValue };
-export type JSList = Array<ConfigValue>;
-export type ConfigValue = string | boolean | number | JSDict | JSList;
-
-export const enum ValueType {
-  Boolean,
-  Number,
-  String,
-  List,
-  Dict,
-}
+export type Dict = { [key: string]: ConfigValue };
+export type List = Array<ConfigValue>;
+export type ConfigValue = string | boolean | number | Dict | List;
 
 export class Config {
   protected parser: Parser;
   protected emitter: Emitter;
   protected content: string;
-  public config: JSDict = {};
+  public config: Dict = {};
   public fileName: string;
 
+  /**
+   *
+   * @param {string} fileName
+   * @param {Object} predefinedValues [optional]
+   */
   constructor(fileName: string, preDefines?: Object) {
     if (typeof fileName !== "string") {
       throw new Error(
@@ -45,11 +42,10 @@ export class Config {
     }
 
     if (preDefines == null && this.existsFile(fileName)) {
-      //this.loadFile(fileName).then(this.parse.bind(this));
       this.loadFile(fileName);
       this.parse();
     } else if (preDefines instanceof Object) {
-      this.config = preDefines as JSDict;
+      this.config = preDefines as Dict;
 
       if (this.existsFile(fileName)) {
         this.loadFile(fileName);
@@ -70,13 +66,15 @@ export class Config {
     this.content = readFileSync(path, { encoding: "utf8" });
   }
 
-  protected parseNode(node: Node<Dict | List | Scalar>): ConfigValue {
+  protected parseNode(
+    node: Node<NodeDict | NodeList | NodeScalar>
+  ): ConfigValue {
     if (node.type == NodeType.Dict) {
-      const dict: JSDict = {};
+      const dict: Dict = {};
 
-      for (const key in (node as Node<Dict>).value) {
-        const valueNode = (node as Node<Dict>).value[key] as Node<
-          Dict | List | Scalar
+      for (const key in (node as Node<NodeDict>).value) {
+        const valueNode = (node as Node<NodeDict>).value[key] as Node<
+          NodeDict | NodeList | NodeScalar
         >;
         const value = this.parseNode(valueNode);
 
@@ -85,11 +83,11 @@ export class Config {
 
       return dict;
     } else if (node.type == NodeType.List) {
-      const length = (node as Node<List>).value.length;
-      const list: JSList = new Array(length);
+      const length = (node as Node<NodeList>).value.length;
+      const list: List = new Array(length);
 
       for (let i = 0; i < length; i++) {
-        const valueNode = (node as Node<List>).value[i];
+        const valueNode = (node as Node<NodeList>).value[i];
         const value = this.parseNode(valueNode);
 
         list[i] = value;
@@ -97,7 +95,7 @@ export class Config {
 
       return list;
     } else if (node.type == NodeType.Scalar) {
-      const value = (node as Node<Scalar>).value;
+      const value = (node as Node<NodeScalar>).value;
 
       if (
         value === "true" ||
@@ -125,25 +123,41 @@ export class Config {
 
     const node = this.parser.parse();
 
-    const config = this.parseNode(node) as JSDict;
+    const config = this.parseNode(node) as Dict;
     this.config = Object.assign(this.config, config);
   }
 
+  /**
+   * Get a config value with unknown type, slower than GetOfType
+   * @param {string} key
+   * @returns {ConfigValue}
+   */
   public get(key: string): ConfigValue {
     return this.config[key];
   }
 
+  /**
+   * Set a config value
+   * @param {string} key
+   * @param {ConfigValue} value
+   */
   public set(key: string, value: ConfigValue): void {
     this.config[key] = value;
   }
 
+  /**
+   * Save the current changes to the opened file
+   * @param {boolean} useCommas [default: true]
+   * @param {boolean} useApostrophe [default: true]
+   *
+   * @returns {Promise<void>}
+   */
   public async save(
     useCommas?: boolean,
     useApostrophe?: boolean
   ): Promise<void> {
     if (!this.existsFile(this.fileName)) this.createFile(this.fileName);
 
-    //const os = createWriteStream(this.fileName, { encoding: 'utf8', autoClose: true });
     this.emitter = new Emitter();
     this.emitter.emitConfigValue(
       this.config,
@@ -153,20 +167,28 @@ export class Config {
       useApostrophe
     );
 
-    await promisify(writeFile)(this.fileName, this.emitter.stream, { encoding: "utf8" });
-    //return new Promise((resolve: CallableFunction) => {
-    //    os.end(resolve);
-    //});
+    await promisify(writeFile)(this.fileName, this.emitter.stream, {
+      encoding: "utf8",
+    });
   }
 
-  // public getOfType(key: string, type: ValueType | number): ConfigValue {}
-
+  /**
+   * Get a config value with known type, faster than normal Get
+   * @param {string} key
+   * @param {ValueType} type
+   * @returns {ReturnValueType}
+   */
   public getOfType<ReturnValueType>(key: string): ReturnValueType {
     return this.config[key] as unknown as ReturnValueType;
   }
 
+  /**
+   * Serialize config
+   * @param {boolean} useCommas [default: true]
+   * @param {boolean} useApostrophe [default: true]
+   * @returns {string}
+   */
   public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
-    //const stream = new Writable({defaultEncoding: 'utf8'});
     this.emitter = new Emitter();
     this.emitter.emitConfigValue(
       this.config,
@@ -176,9 +198,5 @@ export class Config {
       useApostrophe
     );
     return this.emitter.stream;
-
-    //return new Promise<Writable>((resolve: CallableFunction) => {
-    //    stream.end(() => resolve(stream));
-    //});
   }
 }
