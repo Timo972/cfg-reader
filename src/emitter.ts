@@ -5,6 +5,11 @@ import { Dict, List, Node, NodeType, Scalar } from "./node";
 
 export class Emitter {
     public stream: string = "";
+
+    protected containsSpecials(value: string): boolean {
+        return /[:,'"\[\]\{\}]/gm.test(value);
+    }
+
     public emitNode(node: Node<Dict | List | Scalar>, os: Writable, indent: number = 0, isLast: boolean = true): void {
         const _indent = ' '.repeat(indent * 2);
 
@@ -76,15 +81,24 @@ export class Emitter {
             if (indent > 0)
                 //os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`);
                 this.stream += _indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`;
-        } else if (typeof value === "boolean") {
-            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(String(value)) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += (apostrophes ? "'" : '') + Detail.Escape(String(value)) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
-        } else if (typeof value === "string") {
-            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += (apostrophes ? "'" : '') + Detail.Escape(value) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
-        } else if (typeof value === "number") {
-            //os.write(`${(apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (commas ? ',' : '') + (apostrophes ? "'" : '')}\n`);
-            this.stream += (apostrophes ? "'" : '') + Detail.Escape(value.toString()) + (apostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
-        }
+        } else {
+            let escaped;
+
+            if (typeof value === "boolean") {
+                escaped = Detail.Escape(String(value));
+            } else if (typeof value === "string") {
+                escaped = Detail.Escape(value);
+            } else if (typeof value === "number") {
+                escaped = Detail.Escape(value.toString());
+            }
+
+            if (escaped === undefined) {
+                throw new Error(`[CFG-READER] can not emit value of type: ${typeof value}. (you passed an invalid data type)`);
+            }
+
+            const useApostrophes = apostrophes || this.containsSpecials(escaped);
+
+            this.stream += (useApostrophes ? "'" : '') + escaped + (useApostrophes ? "'" : '') + (commas ? ',' : '') + '\n';
+        } 
     }
 }

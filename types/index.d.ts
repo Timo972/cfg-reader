@@ -20,6 +20,7 @@ declare class Node<NodeValueType> {
 
 declare class Emitter {
     stream: string;
+    protected containsSpecials(value: string): boolean;
     emitNode(node: Node<Dict$1 | List$1 | Scalar>, os: Writable, indent?: number, isLast?: boolean): void;
     emitConfigValue(value: ConfigValue, indent?: number, isLast?: boolean, commas?: boolean, apostrophes?: boolean): void;
 }
