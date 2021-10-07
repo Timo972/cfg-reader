@@ -16,6 +16,9 @@ const newVal = "imNew";
 
 const overwriteVal = "overwrittenVal";
 
+const specialCharsKey = 'website';
+const specialCharsVal = 'https://google.de';
+
 const fileName = "scalar-test.cfg";
 
 before(() => {
@@ -23,7 +26,7 @@ before(() => {
 
   fs.writeFileSync(
     fileName,
-    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}`,
+    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}\n${specialCharsKey}: '${specialCharsVal}'`,
     {
       encoding: "utf8",
     }
@@ -50,6 +53,15 @@ describe("Integers, Booleans, Strings", () => {
     );
   });
 
+  it("Get string with special chars", () => {
+    const val = config.get(specialCharsKey);
+    assert.strictEqual(
+      val,
+      specialCharsVal,
+      `expected: ${specialCharsVal}, got: ${val}`
+    )
+  });
+
   it("Get boolean", () => {
     const val = config.get(boolKey);
     assert.strictEqual(val, boolValue, `expected: ${boolValue}, got: ${val}`);
@@ -60,14 +72,30 @@ describe("Integers, Booleans, Strings", () => {
     assert.strictEqual(val, intValue, `expected: ${intValue}, got: ${val}`);
   });
 
-  it("Set new value", () => {
+  it("Set string", () => {
     const success = config.set(newKey, newVal);
     //assert.strictEqual(success, true, "Error while setting key/value");
   });
 
-  it("Check new value", () => {
+  it("Setted string", () => {
     const val = config.get(newKey);
     assert.strictEqual(val, newVal, `expected: ${newVal}, got: ${val}`);
+  });
+
+  it("Set special string", async () => {
+    config.set('wsite', specialCharsVal);
+    await config.save(false, false);
+  });
+
+  it("Read special string", () => {
+    const updatedConfig = new Config(fileName);
+    const updatedValue = updatedConfig.get("wsite");
+
+    assert.strictEqual(
+      updatedValue,
+      specialCharsVal,
+      `expected: ${specialCharsVal}, got: ${updatedValue}`
+    );
   });
 
   it("Overwrite existing value", () => {
