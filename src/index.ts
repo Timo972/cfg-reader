@@ -104,7 +104,7 @@ export class Config {
         value === "no"
       ) {
         return value === "true" || value === "yes";
-      } else if (isNaN(parseFloat(value))) {
+      } else if (isNaN(parseFloat(value)) || value.search(/\./g) >= 2 ) {
         return value;
       } else {
         return parseFloat(value);
