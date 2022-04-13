@@ -19,6 +19,9 @@ const overwriteVal = "127.0.0.1";
 const specialCharsKey = 'website';
 const specialCharsVal = 'https://google.de';
 
+const numKey = 'password';
+const numVal = '12345passwd';
+
 const fileName = "scalar-test.cfg";
 
 before(() => {
@@ -26,7 +29,7 @@ before(() => {
 
   fs.writeFileSync(
     fileName,
-    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}\n${specialCharsKey}: '${specialCharsVal}'`,
+    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}\n${specialCharsKey}: '${specialCharsVal}'\n${numKey}: ${numVal}`,
     {
       encoding: "utf8",
     }
@@ -61,6 +64,11 @@ describe("Integers, Booleans, Strings", () => {
       `expected: ${specialCharsVal}, got: ${val}`
     )
   });
+
+  it("Get string starting with a number", () => {
+    const val = config.get(numKey)
+    assert.strictEqual(val, numVal,  `expected: ${numVal}, got: ${val}`)
+  })
 
   it("Get boolean", () => {
     const val = config.get(boolKey);

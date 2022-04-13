@@ -17,7 +17,7 @@
 ## Installation (works for alt:V too)
 
 ```bash
-npm i --save cfg-reader@next
+npm i --save cfg-reader@latest
 ```
 ---
 ## Differences between v2
