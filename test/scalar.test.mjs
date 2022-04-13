@@ -3,7 +3,7 @@ import { strict as assert } from "assert";
 import fs from "fs";
 
 const existingKey = "test";
-const existingValue = "testval";
+const existingValue = "test.val";
 
 const intKey = "myInt";
 const intValue = 7;
@@ -22,6 +22,9 @@ const specialCharsVal = 'https://google.de';
 const numKey = 'password';
 const numVal = '12345passwd';
 
+const floatKey = 'float';
+const floatVal = 1.5;
+
 const fileName = "scalar-test.cfg";
 
 before(() => {
@@ -29,7 +32,7 @@ before(() => {
 
   fs.writeFileSync(
     fileName,
-    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}\n${specialCharsKey}: '${specialCharsVal}'\n${numKey}: ${numVal}`,
+    `${existingKey}:'${existingValue}'\n${intKey}:${intValue}\n${boolKey}:${boolValue}\n${specialCharsKey}: '${specialCharsVal}'\n${numKey}: ${numVal}\n${floatKey}: ${floatVal}`,
     {
       encoding: "utf8",
     }
@@ -79,6 +82,11 @@ describe("Integers, Booleans, Strings", () => {
     const val = config.get(intKey);
     assert.strictEqual(val, intValue, `expected: ${intValue}, got: ${val}`);
   });
+
+  it("Get float", () => {
+    const val = config.get(floatKey)
+    assert.strictEqual(val, floatVal, `expected: ${floatVal} (type: ${typeof floatVal}), got: ${val} (type: ${typeof val})`)
+  })
 
   it("Set string", () => {
     const success = config.set(newKey, newVal);

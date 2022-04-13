@@ -66,6 +66,18 @@ export class Config {
     this.content = readFileSync(path, { encoding: "utf8" });
   }
 
+  // returns false when value is a float
+  protected isNumber(value: string): boolean {
+    return /^-?\d+$/.test(value);
+  }
+
+  protected isFloat(value: string): boolean {
+    return (
+      this.isNumber(value) ||
+      (value.search(/\./g) == 1 && value.split(".").every(this.isNumber))
+    );
+  }
+
   protected parseNode(
     node: Node<NodeDict | NodeList | NodeScalar>
   ): ConfigValue {
@@ -104,10 +116,10 @@ export class Config {
         value === "no"
       ) {
         return value === "true" || value === "yes";
-      } else if (/^-?\d+$/.test(value) || value.search(/\./g) >= 2 ) {
-        return value;
-      } else {
+      } else if (this.isFloat(value)) {
         return parseFloat(value);
+      } else {
+        return value;
       }
     }
 
