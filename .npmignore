@@ -16,3 +16,4 @@ update.json
 deps/alt-node
 src
 dist/*.d.ts
+dist-types
