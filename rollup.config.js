@@ -1,5 +1,4 @@
-//import typescript from '@rollup/plugin-typescript';
-import typescript from 'rollup-plugin-typescript2';
+import swc from 'unplugin-swc'
 import dts from 'rollup-plugin-dts';
 
 export default [{
@@ -16,17 +15,9 @@ export default [{
   ],
   external: ['fs', 'stream', 'util'],
   plugins: [
-    typescript({
-      allowJs: true,
-      allowSyntheticDefaultImports: true,
-      alwaysStrict: true,
-      baseUrl: './',
-      rootDir: './src',
-      esModuleInterop: true,
-      moduleResolution: "node",
-      declaration: true,
-      declarationDir: './types'
-    })
+    swc.rollup({
+      tsconfigFile: './tsconfig.json',
+    }),
   ]
 },
 {
