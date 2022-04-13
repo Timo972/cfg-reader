@@ -6,7 +6,7 @@
         "baseUrl": "./",
         "checkJs": true,
         "declaration": true,
-        "declarationDir": "./types",
+        "declarationDir": "./dist-types",
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
         "moduleResolution": "node",
@@ -18,8 +18,10 @@
     },
     "exclude": [
         "rollup.config.js",
+        "rollup.config-dts.js",
         "test/*",
         "dist/*",
+        "dist-types/*",
         "node_modules"
     ]
 }

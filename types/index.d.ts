@@ -86,6 +86,8 @@ declare class Config {
     protected existsFile(path: string): boolean;
     protected createFile(path: string): void;
     protected loadFile(path: string): void;
+    protected isNumber(value: string): boolean;
+    protected isFloat(value: string): boolean;
     protected parseNode(node: Node<Dict$1 | List$1 | Scalar>): ConfigValue;
     protected parse(): void;
     /**

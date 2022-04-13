@@ -14,6 +14,7 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "build": "rollup -c",
+    "types": "tsc --emitDeclarationOnly && rollup -c rollup.config-dts.js",
     "test": "mocha",
     "test:scalar": "mocha ./test/scalar.test.mjs",
     "test:list": "mocha ./test/list.test.mjs",

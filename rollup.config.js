@@ -1,5 +1,4 @@
 import swc from 'unplugin-swc'
-import dts from 'rollup-plugin-dts';
 
 export default [{
   input: "src/index.ts",
@@ -16,17 +15,8 @@ export default [{
   external: ['fs', 'stream', 'util'],
   plugins: [
     swc.rollup({
-      tsconfigFile: './tsconfig.json',
+      tsconfigFile: './tsconfig.json',    
     }),
   ]
-},
-{
-  input: "./dist/index.d.ts",
-  output: [{
-    file: "types/index.d.ts",
-    format: "es"
-  }],
-  plugins: [dts()],
-}
-];
+}];
 

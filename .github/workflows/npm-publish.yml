@@ -85,6 +85,9 @@ jobs:
       - run: npm run build
         name: Build
 
+      - run: npm run types
+        name: Generate type definitions
+
       - name: Extract version
         id: version
         shell: bash
