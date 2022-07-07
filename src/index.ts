@@ -21,7 +21,7 @@ export class Config {
 
   private static create(
     content: string,
-    filePath: string,
+    filePath?: string,
     preDefines?: Dict
   ): Config {
     const parser = new Parser(content, filePath);
@@ -34,7 +34,7 @@ export class Config {
     if (typeof content !== "string")
       throw new Error("[CFG-READER]: invalid content type, must be string");
 
-    return this.create(content, null, preDefines);
+    return this.create(content, undefined, preDefines);
   }
 
   public static async load(
@@ -123,7 +123,7 @@ export class Config {
 }
 
 export function parse(content: string): Dict {
-  const parser = new Parser(content, null);
+  const parser = new Parser(content);
   return parser.parse();
 }
 
@@ -136,3 +136,5 @@ export function serialize(
   emitter.emitConfigValue(config, 0, true, useCommas, useApostrophe);
   return emitter.stream;
 }
+
+export type { List, Dict, ConfigValue };
