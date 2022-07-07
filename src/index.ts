@@ -1,18 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, writeFile } from "fs";
 import { promisify } from "util";
 import { Emitter } from "./emitter";
-import {
-  Node,
-  Dict as NodeDict,
-  List as NodeList,
-  Scalar as NodeScalar,
-  NodeType,
-} from "./node";
-import { Parser } from "./parser";
-
-export type Dict = { [key: string]: ConfigValue };
-export type List = Array<ConfigValue>;
-export type ConfigValue = string | boolean | number | Dict | List;
+import { ConfigValue, Dict, Parser } from "./parser";
 
 export class Config {
   protected parser: Parser;
@@ -66,64 +55,6 @@ export class Config {
     this.content = readFileSync(path, { encoding: "utf8" });
   }
 
-  // returns false when value is a float
-  protected isInt(value: string): boolean {
-    return /^-?\d+$/.test(value);
-  }
-
-  protected isFloat(value: string): boolean {
-    const x = value.split(".");
-    return x.length == 2 && x.every(this.isInt);
-  }
-
-  protected parseNode(
-    node: Node<NodeDict | NodeList | NodeScalar>
-  ): ConfigValue {
-    if (node.type == NodeType.Dict) {
-      const dict: Dict = {};
-
-      for (const key in (node as Node<NodeDict>).value) {
-        const valueNode = (node as Node<NodeDict>).value[key] as Node<
-          NodeDict | NodeList | NodeScalar
-        >;
-        const value = this.parseNode(valueNode);
-
-        dict[key] = value;
-      }
-
-      return dict;
-    } else if (node.type == NodeType.List) {
-      const length = (node as Node<NodeList>).value.length;
-      const list: List = new Array(length);
-
-      for (let i = 0; i < length; i++) {
-        const valueNode = (node as Node<NodeList>).value[i];
-        const value = this.parseNode(valueNode);
-
-        list[i] = value;
-      }
-
-      return list;
-    } else if (node.type == NodeType.Scalar) {
-      const value = (node as Node<NodeScalar>).value;
-
-      if (
-        value === "true" ||
-        value === "false" ||
-        value === "yes" ||
-        value === "no"
-      ) {
-        return value === "true" || value === "yes";
-      } else if (this.isInt(value) || this.isFloat(value)) {
-        return parseFloat(value);
-      } else {
-        return value;
-      }
-    }
-
-    return null;
-  }
-
   protected parse(): void {
     if (this.content == null) {
       throw new Error(`[CFG-READER]: no file loaded (internal)`);
@@ -131,10 +62,7 @@ export class Config {
 
     this.parser = new Parser(this.content, this.fileName);
 
-    const node = this.parser.parse();
-
-    const config = this.parseNode(node) as Dict;
-    this.config = Object.assign(this.config, config);
+    this.config = Object.assign(this.config, this.parser.parse());
   }
 
   /**
