@@ -67,15 +67,13 @@ export class Config {
   }
 
   // returns false when value is a float
-  protected isNumber(value: string): boolean {
+  protected isInt(value: string): boolean {
     return /^-?\d+$/.test(value);
   }
 
   protected isFloat(value: string): boolean {
-    return (
-      this.isNumber(value) ||
-      (value.search(/\./g) == 1 && value.split(".").every(this.isNumber))
-    );
+    const x = value.split(".");
+    return x.length == 2 && x.every(this.isInt);
   }
 
   protected parseNode(
@@ -116,7 +114,7 @@ export class Config {
         value === "no"
       ) {
         return value === "true" || value === "yes";
-      } else if (this.isFloat(value)) {
+      } else if (this.isInt(value) || this.isFloat(value)) {
         return parseFloat(value);
       } else {
         return value;

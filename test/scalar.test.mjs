@@ -14,7 +14,7 @@ const boolValue = true;
 const newKey = "nkey";
 const newVal = "imNew";
 
-const overwriteVal = "127.0.0.1";
+const overwriteVal = "0.0.0.0";
 
 const specialCharsKey = 'website';
 const specialCharsVal = 'https://google.de';
