@@ -36,8 +36,8 @@ after(() => {
 describe("Lists", () => {
   let config;
 
-  it("Open file", () => {
-    config = new Config(fileName);
+  it("Open file", async () => {
+    config = await Config.load(fileName);
   });
 
   it("Get existing list", () => {
@@ -83,12 +83,12 @@ describe("Lists", () => {
   });
 
   it("Save list", async () => {
-    const success = await config.save();
+    const success = await config.save(fileName);
     //assert.strictEqual(success, true, "Could not save changes to file");
   });
 
-  it("Re-open file", () => {
-    config = new Config(fileName);
+  it("Re-open file", async () => {
+    config = await Config.load(fileName);
   });
 
   it("Check serialization", () => {

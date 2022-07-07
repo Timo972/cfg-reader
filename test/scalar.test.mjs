@@ -46,8 +46,8 @@ after(() => {
 describe("Integers, Booleans, Strings", () => {
   let config;
 
-  it("Open file", () => {
-    config = new Config(fileName);
+  it("Open file", async () => {
+    config = await Config.load(fileName);
   });
 
   it("Get string", () => {
@@ -100,11 +100,11 @@ describe("Integers, Booleans, Strings", () => {
 
   it("Set special string", async () => {
     config.set('wsite', specialCharsVal);
-    await config.save(false, false);
+    await config.save(fileName, false, false);
   });
 
-  it("Read special string", () => {
-    const updatedConfig = new Config(fileName);
+  it("Read special string", async () => {
+    const updatedConfig = await Config.load(fileName);
     const updatedValue = updatedConfig.get("wsite");
 
     assert.strictEqual(
@@ -133,12 +133,12 @@ describe("Integers, Booleans, Strings", () => {
   });
 
   it("Save changes to file", async () => {
-    const success = await config.save();
+    const success = await config.save(fileName);
     //assert.strictEqual(success, true, "Could not save changes to file");
   });
 
-  it("Check Emitter", () => {
-    const updatedConfig = new Config(fileName);
+  it("Check Emitter", async () => {
+    const updatedConfig = await Config.load(fileName);
     const updatedValue = updatedConfig.get(existingKey);
     assert.strictEqual(
       updatedValue,

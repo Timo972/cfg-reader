@@ -1,77 +1,83 @@
-import { existsSync, readFileSync, writeFileSync, writeFile } from "fs";
+import { existsSync, writeFile, readFile } from "fs";
 import { promisify } from "util";
 import { Emitter } from "./emitter";
-import { ConfigValue, Dict, Parser } from "./parser";
+import { ConfigValue, Dict, List, Parser } from "./parser";
 
 export class Config {
-  protected parser: Parser;
-  protected emitter: Emitter;
-  protected content: string;
   public config: Dict = {};
-  public fileName: string;
 
   /**
-   *
-   * @param {string} fileName
-   * @param {Object} predefinedValues [optional]
+   * @param {Dict} preDefines [optional]
    */
-  constructor(fileName: string, preDefines?: Object) {
-    if (typeof fileName !== "string") {
-      throw new Error(
-        "[CFG-READER]: invalid constructor call, fileName must be type string"
-      );
-    }
-
-    this.fileName = fileName;
-
+  constructor(preDefines?: Dict) {
     if (!(preDefines instanceof Object) && preDefines != null) {
       throw new Error(
         "[CFG-READER]: invalid constructor call, preDefines must be null or Object"
       );
     }
 
-    if (preDefines == null && this.existsFile(fileName)) {
-      this.loadFile(fileName);
-      this.parse();
-    } else if (preDefines instanceof Object) {
-      this.config = preDefines as Dict;
-
-      if (this.existsFile(fileName)) {
-        this.loadFile(fileName);
-        this.parse();
-      }
-    }
+    if (preDefines instanceof Object) this.config = preDefines;
   }
 
-  protected existsFile(path: string): boolean {
-    return existsSync(path);
+  private static create(
+    content: string,
+    filePath: string,
+    preDefines?: Dict
+  ): Config {
+    const parser = new Parser(content, filePath);
+    const config = new Config(preDefines);
+    config.config = parser.parse();
+    return config;
   }
 
-  protected createFile(path: string): void {
-    writeFileSync(path, "", { encoding: "utf8" });
+  public static parse(content: string, preDefines?: Dict): Config {
+    if (typeof content !== "string")
+      throw new Error("[CFG-READER]: invalid content type, must be string");
+
+    return this.create(content, null, preDefines);
   }
 
-  protected loadFile(path: string): void {
-    this.content = readFileSync(path, { encoding: "utf8" });
-  }
+  public static async load(
+    filePath: string,
+    preDefines?: Dict
+  ): Promise<Config> {
+    if (typeof filePath !== "string")
+      throw new Error("[CFG-READER]: invalid filePath type, must be string");
 
-  protected parse(): void {
-    if (this.content == null) {
-      throw new Error(`[CFG-READER]: no file loaded (internal)`);
-    }
+    if (!existsSync(filePath)) throw new Error("[CFG-READER]: file not found");
 
-    this.parser = new Parser(this.content, this.fileName);
+    const content = await promisify(readFile)(filePath, {
+      encoding: "utf8",
+    });
 
-    this.config = Object.assign(this.config, this.parser.parse());
+    return this.create(content, filePath, preDefines);
   }
 
   /**
    * Get a config value with unknown type, slower than GetOfType
    * @param {string} key
-   * @returns {ConfigValue}
+   * @returns {Value}
    */
-  public get(key: string): ConfigValue {
-    return this.config[key];
+  public get<Value extends string | number | boolean | List | Dict>(
+    key: string
+  ): Value {
+    if (!(key in this.config))
+      throw new Error(`[CFG-READER] key '${key}' not found in config`);
+
+    return this.config[key] as Value;
+  }
+
+  /**
+   * Get a config value
+   * @param {string} key
+   * @returns {ReturnValueType}
+   * @deprecated
+   */
+  public getOfType<ReturnValueType extends ConfigValue>(
+    key: string
+  ): ReturnValueType {
+    return this.get<ReturnValueType>(key);
+    // return this.config[key] as unknown as ReturnValueType;
   }
 
   /**
@@ -91,33 +97,16 @@ export class Config {
    * @returns {Promise<void>}
    */
   public async save(
+    filePath: string,
     useCommas?: boolean,
     useApostrophe?: boolean
   ): Promise<void> {
-    if (!this.existsFile(this.fileName)) this.createFile(this.fileName);
+    const emitter = new Emitter();
+    emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
 
-    this.emitter = new Emitter();
-    this.emitter.emitConfigValue(
-      this.config,
-      0,
-      true,
-      useCommas,
-      useApostrophe
-    );
-
-    await promisify(writeFile)(this.fileName, this.emitter.stream, {
+    await promisify(writeFile)(filePath, emitter.stream, {
       encoding: "utf8",
     });
-  }
-
-  /**
-   * Get a config value with known type, faster than normal Get
-   * @param {string} key
-   * @param {ValueType} type
-   * @returns {ReturnValueType}
-   */
-  public getOfType<ReturnValueType>(key: string): ReturnValueType {
-    return this.config[key] as unknown as ReturnValueType;
   }
 
   /**
@@ -127,14 +116,23 @@ export class Config {
    * @returns {string}
    */
   public serialize(useCommas?: boolean, useApostrophe?: boolean): string {
-    this.emitter = new Emitter();
-    this.emitter.emitConfigValue(
-      this.config,
-      0,
-      true,
-      useCommas,
-      useApostrophe
-    );
-    return this.emitter.stream;
+    const emitter = new Emitter();
+    emitter.emitConfigValue(this.config, 0, true, useCommas, useApostrophe);
+    return emitter.stream;
   }
+}
+
+export function parse(content: string): Dict {
+  const parser = new Parser(content, null);
+  return parser.parse();
+}
+
+export function serialize(
+  config: Dict,
+  useCommas?: boolean,
+  useApostrophe?: boolean
+): string {
+  const emitter = new Emitter();
+  emitter.emitConfigValue(config, 0, true, useCommas, useApostrophe);
+  return emitter.stream;
 }

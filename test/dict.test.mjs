@@ -32,8 +32,8 @@ after(() => {
 describe("Dicts", () => {
   let config;
 
-  it("Open file", () => {
-    config = new Config(fileName);
+  it("Open file", async() => {
+    config = await Config.load(fileName);
   });
 
   it("Get existing dict", () => {
@@ -78,12 +78,12 @@ describe("Dicts", () => {
   });
 
   it("Save dict", async () => {
-    const success = await config.save();
+    const success = await config.save(fileName);
     //assert.strictEqual(success, true, "Could not save changes to file");
   });
 
-  it("Re-open file", () => {
-    config = new Config(fileName);
+  it("Re-open file", async() => {
+    config = await Config.load(fileName);
   });
 
   it("Check serialization", () => {

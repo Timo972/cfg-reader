@@ -14,7 +14,7 @@ describe("New config", () => {
     let config;
     it("Create config", () => {
       if (fs.existsSync(newConfigPath)) fs.unlinkSync(newConfigPath);
-      config = new Config(newConfigPath);
+      config = new Config();
       assert.strictEqual("get" in config, true, "Invalid config instance");
     });
     it("Set value", () => {
@@ -22,11 +22,11 @@ describe("New config", () => {
       //assert.strictEqual(success, true, "Error while setting key/value");
     });
     it("Save config", async () => {
-      const success = await config.save();
+      const success = await config.save(newConfigPath);
       //assert.strictEqual(success, true, "Could not save changes to file");
     });
-    it("Re-open config", () => {
-      config = new Config(newConfigPath);
+    it("Re-open config", async () => {
+      config = await Config.load(newConfigPath);
       assert.strictEqual("get" in config, true, "Invalid config instance");
     });
     it("Check", () => {
@@ -37,17 +37,17 @@ describe("New config", () => {
 
   describe("Predefined values", () => {
     let config;
-    it("Create config", () => {
+    it("Create config", async () => {
       if (fs.existsSync(newConfigPath)) fs.unlinkSync(newConfigPath);
-      config = new Config(newConfigPath, { test: true });
+      config = new Config({ test: true });
       assert.strictEqual("get" in config, true, "Invalid config instance");
     });
     it("Save config", async () => {
-      const success = await config.save();
+      const success = await config.save(newConfigPath);
       //assert.strictEqual(success, true, "Could not save changes to file");
     });
-    it("Re-open config", () => {
-      config = new Config(newConfigPath);
+    it("Re-open config", async () => {
+      config = await Config.load(newConfigPath);
       assert.strictEqual("get" in config, true, "Invalid config instance");
     });
     it("Check", () => {

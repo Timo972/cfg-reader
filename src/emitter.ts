@@ -1,5 +1,5 @@
 import { Writable } from "stream";
-import { ConfigValue, Dict, List } from "./parser";
+import { ConfigValue } from "./parser";
 import { Detail } from "./detail";
 
 export class Emitter {
@@ -7,50 +7,6 @@ export class Emitter {
 
   protected containsSpecials(value: string): boolean {
     return /[:,'"\[\]\{\}]/gm.test(value);
-  }
-
-  public emitNode(
-    node: ConfigValue,
-    os: Writable,
-    indent: number = 0,
-    isLast: boolean = true
-  ): void {
-    const _indent = " ".repeat(indent * 2);
-
-    if (
-      typeof node === "string" ||
-      typeof node === "bigint" ||
-      typeof node === "boolean" ||
-      typeof node === "number"
-    ) {
-      os.write(`'${Detail.Escape(String(node))}',\n`);
-    } else if (typeof node === "object" && node instanceof Array) {
-      os.write("[\n");
-
-      const list = node as List;
-      for (let i = 0; i < list.length; i++) {
-        const it = list[i];
-        os.write(_indent);
-        this.emitNode(it, os, indent + 1, i == list.length - 1);
-      }
-
-      os.write(`${" ".repeat((indent - 1) * 2)}${isLast ? "]\n" : "],\n"}`);
-    } else if (typeof node === "object" && node instanceof Object) {
-      if (indent > 0) os.write("{\n");
-
-      const dict = node as Dict;
-      const keys = Object.keys(dict);
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        // if (dict[key].type == NodeType.None) continue;
-
-        os.write(_indent + key + ":");
-        this.emitNode(dict[key], os, indent + 1, i == keys.length - 1);
-      }
-
-      if (indent > 0)
-        os.write(`${" ".repeat((indent - 1) * 2)}${isLast ? "}\n" : "},\n"}`);
-    }
   }
 
   public emitConfigValue(
