@@ -12,7 +12,7 @@ export default [{
       format: "cjs",
     },
   ],
-  external: ['fs', 'stream', 'util'],
+  external: [],
   plugins: [
     swc.rollup({
       tsconfigFile: './tsconfig.json',    

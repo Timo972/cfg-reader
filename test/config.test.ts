@@ -1,43 +1,70 @@
-import { strict as assert } from "assert";
-import { Config, parse, serialize } from "../src";
+import test from "ava";
+import { parse, serialize } from "../src";
 import { Dict } from "../src/parser";
 
-const filePath = "test.cfg";
+const serialized =
+`test: true
+bool: true
+string: string
+number: 1
+float: 3.3
+array: [
+  1
+  true
+  2.5
+  false
+]
+nested: {
+  x: false
+  y: {
+    ip: 0.0.0.0
+    localhost: 127.0.0.1
+  }
+}
+`
 const fileContent = `
 test: true
+bool: yes
+string: 'string'
+number: 1
+float: 3.3
+array: [
+  1
+  yes
+  2.5
+  false
+]
+nested: {
+  x: no
+  y: {
+    ip: '0.0.0.0',
+    localhost: 127.0.0.1
+  }
+}
 `;
 const config: Dict = {
   test: true,
+  bool: true,
+  string: "string",
+  number: 1,
+  float: 3.3,
+  array: [1, true, 2.5, false],
+  nested: {
+    x: false,
+    y: {
+      ip: "0.0.0.0",
+      localhost: "127.0.0.1",
+    },
+  },
 };
 
-interface MySQLConfig {
-  host: string;
-  username: string;
-  password: string;
-  database: string;
-}
+test("serialize", (t) => {
+  const content = serialize(config, false, false);
+  t.deepEqual(content, serialized);
+});
 
-describe("Config API", () => {
-  it("Config::load", async (done) => {
-    const config = await Config.load(filePath);
-    done();
-  });
-
-  it("Config::parse", () => {
-    const config = Config.parse(fileContent);
-  });
-
-  it("Config::get", () => {
-    const config = Config.parse(fileContent);
-    const x = config.get<Dict>("mysql");
-    config.get<string>("");
-  });
-
-  it("serialize", () => {
-    const content = serialize(config, true, true);
-  });
-
-  it("parse", () => {
-    const config = parse(fileContent);
-  });
+test("parse", (t) => {
+  const aconfig = parse(fileContent);
+  // t.is(aconfig, config);
+  t.deepEqual(aconfig, config);
 });

@@ -57,11 +57,10 @@ export class Parser {
   public line: number = 0;
   public column: number = 0;
   public tokIdx: number = 0;
-  public filePath: string;
+  // public filePath: string;
 
-  constructor(content: string, filePath?: string) {
+  constructor(content: string) {
     this.buffer = content;
-    this.filePath = filePath;
   }
 
   public parse(): Dict {
@@ -267,11 +266,12 @@ export class Parser {
     } else line = token;
 
     line++;
+    if (col)
     col++;
 
-    const place = this.filePath
+    const place = /*this.filePath
       ? `${this.filePath}:${line}:${col}`
-      : `${line}:${col}`;
+      : */`${line}:${col}`;
     const base = `[CFG-READER] error at line ${place} -> `;
 
     switch (type) {

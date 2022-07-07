@@ -1,4 +1,3 @@
-import { Writable } from "stream";
 import { ConfigValue } from "./parser";
 import { Detail } from "./detail";
 
@@ -24,7 +23,7 @@ export class Emitter {
       for (let i = 0; i < value.length; i++) {
         //os.write(_indent);
         this.stream += _indent;
-        this.emitConfigValue(value[i], indent + 1, i == value.length - 1);
+        this.emitConfigValue(value[i], indent + 1, i == value.length - 1, commas, apostrophes);
       }
 
       //os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? ']\n' : '],\n'}`);
@@ -43,16 +42,17 @@ export class Emitter {
         if (_value == null) continue;
 
         //os.write(_indent + key + ':');
-        this.stream += _indent + key + ":";
-        this.emitConfigValue(_value, indent + 1, i == keys.length - 1);
+        this.stream += _indent + key + ": ";
+        this.emitConfigValue(_value, indent + 1, i == keys.length - 1, commas, apostrophes);
       }
 
       if (indent > 0)
         //os.write(_indent.repeat(indent - 1) + `${isLast || !commas ? '}\n' : '},\n'}`);
         this.stream +=
-          _indent.repeat(indent - 1) + `${isLast || !commas ? "}\n" : "},\n"}`;
+          " ".repeat((indent - 1) * 2) +
+          `${isLast || !commas ? "}\n" : "},\n"}`;
     } else {
-      let escaped;
+      let escaped: string | null = null;
 
       if (typeof value === "boolean") {
         escaped = Detail.Escape(String(value));
@@ -62,7 +62,7 @@ export class Emitter {
         escaped = Detail.Escape(value.toString());
       }
 
-      if (escaped === undefined) {
+      if (escaped === null) {
         throw new Error(
           `[CFG-READER] can not emit value of type: ${typeof value}. (you passed an invalid data type)`
         );

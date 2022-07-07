@@ -15,10 +15,7 @@
   "scripts": {
     "build": "rollup -c",
     "types": "tsc --emitDeclarationOnly && rollup -c rollup.config-dts.js",
-    "test": "mocha",
-    "test:scalar": "mocha ./test/scalar.test.mjs",
-    "test:list": "mocha ./test/list.test.mjs",
-    "test:dict": "mocha ./test/dict.test.mjs"
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -42,15 +39,22 @@
   "devDependencies": {
     "@swc/core": "^1.2.165",
     "@types/node": "^16.11.26",
-    "fs": "0.0.1-security",
-    "mocha": "^8.3.0",
+    "ava": "^4.3.0",
     "rollup": "^2.58.0",
     "rollup-plugin-dts": "^4.0.0",
-    "tslib": "^2.3.1",
+    "ts-node": "^10.8.2",
     "typescript": "^4.4.3",
     "unplugin-swc": "^1.3.0"
   },
   "engines": {
     "node": ">= 12"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "nodeArguments": [
+      "--loader=ts-node/esm"
+    ]
   }
 }

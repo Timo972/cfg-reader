@@ -20,42 +20,42 @@
 npm i --save cfg-reader@latest
 ```
 ---
-## Differences between v2
+## Differences between v3
 The cfg-reader is now a full typescript port of the open source alt-config parser from the altMP Team.  
 
-## Breaking changes
-- Config::save() returns Promise<void>
-- Config::getOfType() uses generics and only accepts key as argument
+### Breaking changes
+- Removed Config class API
 
 ## How to use
-
-```js
-const { Config } = require("cfg-reader");
-const myCfg = new Config("config.cfg");
-const val = myCfg.get("test");
-//with the get method you can easiely filter the lines you need
+```
+# config.cfg
+name: Test
+port: 7788
+players: 1 
 ```
 
 ```ts
-import { Config, Type } = from "cfg-reader";
-const testCfg = new Config("test.cfg");
-// If you know which type the value you want to get has you can use
-// getOfType(key: string, type: number).
-// It directly converts the value to the specific type
-// and does not have to iterate over all possible types.
-// -> little faster
-const myString = testCfg.getOfType<string>("test");
-// typeof myString === "string";
+// config.ts
+// Typescript types
+import type { List, Dict, ConfigValue } from "cfg-reader";
+// Functions
+import { parse, serialize } from "cfg-reader";
+
+import { promises: { readFile } } from 'fs';
+
+const rawConfig = await readFile('config.cfg');
+const config = parse(rawConfig);
+
+console.log(config.port); // prints: 7788
+console.log(config.players); // prints: 1
 ```
 
 ## API
 Check out [Typescript types](types/index.d.ts)
 
 ## Example
-
-config.cfg
-
-```cfg
+```bash
+# config.cfg
 mysql: {
     host: 127.0.0.1,
     user: root,
@@ -64,17 +64,18 @@ mysql: {
 }
 ```
 
-index.js
-
 ```js
+// index.js
 const mysql = require('mysql2');
-const config = new require('cfg-reader').Config('config.cfg');
+const { readFile } = require('fs').promises;
+const CFG = require('cfg-reader');
 // equal to es6
-// import { Config } from 'cfg-reader';
-// const config = new Config('config.cfg');
-const con = mysql.createConnection(config.get('mysql'));
-// or
-const con = mysql.createConnection(config.config.mysql);
+// import * as CFG from 'cfg-reader';
+
+const rawConfig = await readFile('config.cfg');
+const { mysql } = CFG.parse(rawConfig);
+
+const conn = mysql.createConnection(mysql);
 ...
 ```
 
