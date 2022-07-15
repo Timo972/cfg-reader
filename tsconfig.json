@@ -22,6 +22,7 @@
         "test/*",
         "dist/*",
         "dist-types/*",
-        "node_modules"
+        "node_modules",
+        "mod.ts"
     ]
 }

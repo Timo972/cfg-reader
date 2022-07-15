@@ -20,3 +20,4 @@ compiled
 binding.gyp
 dist
 dist-types
+types
