@@ -5,8 +5,8 @@ on:
     branches-ignore:
       - '**'
     tags:
-      - '*.*.*-rc*'
-      - '*.*.*'
+      - 'v*.*.*-rc*'
+      - 'v*.*.*'
 
 jobs:
   test:
@@ -93,7 +93,7 @@ jobs:
         shell: bash
         run: |
           TAG=${GITHUB_REF/refs\/tags\//}
-          echo ::set-output name=TAG::${TAG}
+          echo ::set-output name=TAG::${TAG#v}
 
       - name: Bump package.json version
         shell: bash
@@ -153,7 +153,7 @@ jobs:
         shell: bash
         run: |
           TAG=${GITHUB_REF/refs\/tags\//}
-          echo ::set-output name=TAG::${TAG}
+          echo ::set-output name=TAG::${TAG#v}
 
       - name: Bump package.json version
         shell: bash
