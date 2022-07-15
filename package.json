@@ -1,6 +1,6 @@
 {
   "name": "cfg-reader",
-  "version": "3.0.0-dev",
+  "version": "4.0.0-dev",
   "description": "alt-config (alt:V configuration) file parser",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",

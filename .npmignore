@@ -17,3 +17,8 @@ deps/alt-node
 src
 dist/*.d.ts
 dist-types
+mod.ts
+test
+.gitignore
+rollup.config*
+tsconfig.json
