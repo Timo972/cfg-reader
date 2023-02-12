@@ -10,7 +10,7 @@
 			},
 			"problemMatcher": [],
 			"label": "npm: build",
-			"detail": "node-gyp rebuild"
+			"detail": "rollup -c"
 		}
 	]
 }

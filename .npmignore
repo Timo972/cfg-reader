@@ -14,3 +14,6 @@ update.json
 .vscode
 .github
 deps/alt-node
+src
+dist/*.d.ts
+dist-types

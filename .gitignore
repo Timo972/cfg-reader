@@ -18,3 +18,5 @@ jsconfig.json
 new.cfg
 compiled
 binding.gyp
+dist
+dist-types
