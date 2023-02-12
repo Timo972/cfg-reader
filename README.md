@@ -6,6 +6,9 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/aec7d7510bb34f138b70c304818945e4)](https://www.codacy.com/gh/Timo972/cfg-reader/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Timo972/cfg-reader&utm_campaign=Badge_Grade)
 [![Latest Build](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/Timo972/cfg-reader/actions/workflows/npm-publish.yml)
 
+## Deprecation notice
+⚠️ alt:V has moved to toml configuration files, so this package is obsolete
+
 ## License and copyright notice
 
 [alt-config (MIT)](https://github.com/altmp/alt-config)
